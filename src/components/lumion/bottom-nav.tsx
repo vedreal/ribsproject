@@ -17,36 +17,45 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-card/80 backdrop-blur-lg border-t border-border/50">
-      <div className="container mx-auto h-full max-w-lg">
-        <div className="grid grid-cols-5 h-full items-center">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+    <nav className="fixed bottom-4 inset-x-0 mx-auto h-16 w-[95%] max-w-sm bg-card/80 backdrop-blur-xl rounded-full border border-border/50 shadow-2xl z-50">
+      <div className="grid grid-cols-5 h-full items-center">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group flex flex-col items-center justify-center gap-1.5 h-full focus:outline-none"
+            >
+              <div
+                className={cn(
+                  'flex items-center justify-center h-8 w-8 rounded-full transition-colors duration-200',
+                  isActive ? 'bg-accent' : 'bg-transparent'
+                )}
               >
                 <item.icon
                   className={cn(
-                    'h-6 w-6',
-                    isActive ? 'text-accent' : ''
+                    'h-5 w-5 transition-colors duration-200',
+                    isActive
+                      ? 'text-accent-foreground'
+                      : 'text-muted-foreground group-hover:text-foreground'
                   )}
-                  strokeWidth={isActive ? 2.5 : 2}
+                  strokeWidth={2.5}
                 />
-                <span
-                  className={cn(
-                    'text-xs font-medium',
-                    isActive ? 'text-accent' : ''
-                  )}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
+              <span
+                className={cn(
+                  'text-[10px] font-semibold transition-colors duration-200',
+                  isActive
+                    ? 'text-accent'
+                    : 'text-muted-foreground group-hover:text-foreground'
+                )}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
