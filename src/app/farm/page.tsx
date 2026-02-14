@@ -26,11 +26,13 @@ export default function FarmPage() {
   const [timeToClaim, setTimeToClaim] = useState('');
   const [isUpgradeSheetOpen, setIsUpgradeSheetOpen] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     // Initialize client-side state
     setClaimTime(Date.now() + TWO_HOURS_IN_MS / 2); // Example: start halfway through
     setTapsLeft(850); // Example
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function FarmPage() {
       <div className="text-center space-y-8">
         <div>
           <h1 className="font-headline text-5xl font-bold text-primary">
-            {balance.toLocaleString()}
+            {isMounted ? balance.toLocaleString() : balance.toLocaleString('en-US')}
           </h1>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
             <LumionIcon className="w-5 h-5" /> Your LUMION Balance
@@ -120,7 +122,7 @@ export default function FarmPage() {
             ))}
           </button>
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full">
-            <p className="text-lg font-bold">{tapsLeft.toLocaleString()} / {DAILY_TAPS}</p>
+            <p className="text-lg font-bold">{isMounted ? tapsLeft.toLocaleString() : tapsLeft.toLocaleString('en-US')} / {DAILY_TAPS.toLocaleString('en-US')}</p>
             <Progress value={(tapsLeft / DAILY_TAPS) * 100} className="w-3/4 mx-auto mt-1 h-2" />
           </div>
         </div>

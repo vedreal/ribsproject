@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,11 @@ export default function ProfilePage() {
     const { toast } = useToast();
     const [email, setEmail] = useState(userProfile.email || '');
     const [isCopied, setIsCopied] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleCopy = () => {
         const referralLink = `https://t.me/lumion_bot?start=${userProfile.referralCode}`;
@@ -57,7 +62,7 @@ export default function ProfilePage() {
         </header>
 
         <div className="grid grid-cols-2 gap-4">
-            <StatCard icon={LumionIcon} title="Total Lumions" value={userProfile.totalLumions.toLocaleString()} />
+            <StatCard icon={LumionIcon} title="Total Lumions" value={isMounted ? userProfile.totalLumions.toLocaleString() : userProfile.totalLumions.toLocaleString('en-US')} />
             <StatCard icon={Users} title="Total Referrals" value={userProfile.totalReferrals} />
             <StatCard icon={Calendar} title="Join Date" value={userProfile.joinDate} />
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />

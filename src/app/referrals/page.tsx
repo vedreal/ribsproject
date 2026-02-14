@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/lumion/app-layout';
 import { userProfile } from '@/lib/data';
 import { Copy, Check, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LumionIcon } from '@/components/lumion/lumion-icon';
 
 const referrals = [
@@ -20,6 +20,11 @@ const referrals = [
 export default function ReferralsPage() {
     const { toast } = useToast();
     const [isCopied, setIsCopied] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleCopy = () => {
         const referralLink = `https://t.me/lumion_bot?start=${userProfile.referralCode}`;
@@ -74,7 +79,7 @@ export default function ReferralsPage() {
                                 <span className="font-medium">{ref.name}</span>
                             </div>
                             <div className="flex items-center gap-2 font-semibold text-primary">
-                                <Gift className="w-4 h-4" /> +{ref.lumions.toLocaleString()}
+                                <Gift className="w-4 h-4" /> +{isMounted ? ref.lumions.toLocaleString() : ref.lumions.toLocaleString('en-US')}
                             </div>
                         </li>
                     ))}

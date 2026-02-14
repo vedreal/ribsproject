@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { upgrades as initialUpgrades, type Upgrade } from '@/lib/data';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LumionIcon } from './lumion-icon';
 import { toast } from '@/hooks/use-toast';
 import { Flame, Zap, Gem } from 'lucide-react';
@@ -30,6 +30,11 @@ export function UpgradeSheet({
   onOpenChange: (isOpen: boolean) => void;
 }) {
   const [upgrades, setUpgrades] = useState<Upgrade[]>(initialUpgrades);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleUpgrade = (upgradeId: string) => {
     // In a real app, you'd check if the user has enough coins
@@ -76,7 +81,7 @@ export function UpgradeSheet({
                 <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
                     {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
                         <>
-                            Upgrade for <LumionIcon className="w-4 h-4 inline-block mx-1" /> {upgrade.cost.toLocaleString()}
+                            Upgrade for <LumionIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? upgrade.cost.toLocaleString() : upgrade.cost.toLocaleString('en-US')}
                         </>
                     )}
                 </Button>
