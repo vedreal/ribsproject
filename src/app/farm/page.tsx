@@ -94,19 +94,19 @@ export default function FarmPage() {
       <div className="text-center space-y-8">
         <div>
           <h1 className="font-headline text-5xl font-bold text-primary">
-            {isMounted ? balance.toLocaleString() : balance.toLocaleString('en-US')}
+            {isMounted ? balance.toLocaleString('en-US') : balance.toLocaleString('en-US')}
           </h1>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
             <LumionIcon className="w-5 h-5" /> Your LUMION Balance
           </p>
         </div>
 
-        <div className="relative">
+        <div className="flex flex-col items-center space-y-4">
           <button
             onClick={handleTap}
             disabled={tapsLeft <= 0}
             className={cn(
-                "relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed animate-[pulse-glow_4s_ease-in-out_infinite]",
+                "relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center text-center"
             )}
           >
@@ -121,9 +121,11 @@ export default function FarmPage() {
               </span>
             ))}
           </button>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full">
-            <p className="text-lg font-bold">{isMounted ? tapsLeft.toLocaleString() : tapsLeft.toLocaleString('en-US')} / {DAILY_TAPS.toLocaleString('en-US')}</p>
-            <Progress value={(tapsLeft / DAILY_TAPS) * 100} className="w-3/4 mx-auto mt-1 h-2" />
+          <div className="w-full max-w-xs text-center space-y-1">
+            <p className="text-lg font-bold">
+              {isMounted ? tapsLeft.toLocaleString('en-US') : '...'} / {DAILY_TAPS.toLocaleString('en-US')}
+            </p>
+            <Progress value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0} className="h-3" />
           </div>
         </div>
 
