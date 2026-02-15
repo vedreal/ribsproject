@@ -52,15 +52,15 @@ export function UpgradeSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="max-w-lg w-full flex flex-col">
-        <SheetHeader>
+      <SheetContent className="max-w-lg w-full flex flex-col p-0">
+        <SheetHeader className="p-6 pb-2">
           <SheetTitle className="font-headline text-3xl">Upgrades</SheetTitle>
           <SheetDescription>
             Increase your RIBS income by upgrading your farm.
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1">
-          <div className="py-4 space-y-4">
+          <div className="space-y-4 px-6 pb-6">
             {upgrades.map((upgrade) => {
               const Icon = iconMap[upgrade.id] || Gem;
               return (
