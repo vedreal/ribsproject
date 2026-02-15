@@ -76,20 +76,20 @@ export const upgrades: Upgrade[] = [
     {
         id: 'farming-rate',
         name: 'Farming Rate',
-        description: 'Increase the amount of RIBS you earn per hour.',
-        level: 4,
+        description: 'Increase the amount of RIBS you earn from passive farming.',
+        level: 1,
         maxLevel: 10,
-        cost: 12000,
-        benefit: '+100 RIBS/hr'
+        cost: 2500,
+        benefit: '+50 RIBS/2hr'
     },
     {
         id: 'tap-power',
         name: 'Tap Power',
         description: 'Increase the amount of RIBS you earn per tap.',
-        level: 1,
+        level: 2,
         maxLevel: 3,
-        cost: 1000,
-        benefit: '+2 RIBS/tap'
+        cost: 3000,
+        benefit: '+5 RIBS/tap'
     },
     {
         id: 'tap-energy',

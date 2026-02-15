@@ -143,7 +143,7 @@ export default function FarmPage() {
             <CardHeader>
               <CardTitle className="font-headline">Hourly Claim</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 text-center">
               <p className="text-3xl font-bold font-mono">
                 {timeToClaim || 'Loading...'}
               </p>
@@ -155,6 +155,7 @@ export default function FarmPage() {
               >
                 Claim
               </Button>
+              <p className="text-sm text-muted-foreground pt-2">Farming: 250 RIBS/2hr</p>
             </CardContent>
           </Card>
 
