@@ -30,7 +30,7 @@ export default function FarmPage() {
 
   useEffect(() => {
     // Initialize client-side state
-    setClaimTime(Date.now() + TWO_HOURS_IN_MS / 2); // Example: start halfway through
+    setClaimTime(Date.now() + TWO_HOURS_IN_MS);
     setTapsLeft(850); // Example
     setIsMounted(true);
   }, []);
@@ -141,7 +141,7 @@ export default function FarmPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline">Hourly Claim</CardTitle>
+              <CardTitle className="font-headline">Farming Claim</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-center">
               <p className="text-3xl font-bold font-mono">
