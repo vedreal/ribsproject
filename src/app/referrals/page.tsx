@@ -44,7 +44,7 @@ export default function ReferralsPage() {
           <p className="text-muted-foreground">Invite friends and earn a percentage of their farm.</p>
         </header>
 
-        <div className="rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 p-6 text-center space-y-4 shadow-inner">
+        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 text-center space-y-4">
             <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Invite Link</h2>
             <p className="text-sm max-w-md mx-auto">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
             <Button onClick={handleCopy} size="lg" className="w-full max-w-sm font-bold mx-auto">
@@ -53,14 +53,14 @@ export default function ReferralsPage() {
             </Button>
         </div>
 
-        <div className="rounded-xl bg-background/50 p-6 shadow-inner border border-white/5">
+        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6">
             <div className="space-y-1.5 mb-6">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Referrals ({referrals.length})</h2>
                 <p className="text-sm text-muted-foreground">Users who joined using your link.</p>
             </div>
             <ul className="space-y-3">
                 {referrals.map((ref, index) => (
-                    <li key={index} className="flex items-center justify-between bg-background/70 p-3 rounded-lg shadow-inner border border-white/5">
+                    <li key={index} className="flex items-center justify-between bg-gradient-to-br from-card to-background border border-border p-3 rounded-lg">
                         <div className="flex items-center gap-3">
                             <Image
                             src={`https://picsum.photos/seed/${ref.name}/40/40`}

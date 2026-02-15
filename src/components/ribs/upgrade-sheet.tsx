@@ -68,7 +68,7 @@ export function UpgradeSheet({
               const benefit = upgrade.benefits[currentLevel-1] || upgrade.benefits[upgrade.benefits.length-1];
 
               return (
-              <div key={upgrade.id} className="bg-background/50 rounded-xl p-4 space-y-4 shadow-inner border border-white/5">
+              <div key={upgrade.id} className="bg-gradient-to-br from-secondary to-card border border-border rounded-xl p-4 space-y-4">
                 <div className="flex items-center gap-3">
                   <Icon className="w-8 h-8 text-accent" />
                   <div>

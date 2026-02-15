@@ -29,7 +29,7 @@ export default function FarmPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
-  const farmingBenefit = farmingUpgrade ? 200 + farmingUpgrade.level * 50 : 250;
+  const farmingBenefit = farmingUpgrade ? parseInt(farmingUpgrade.benefits[farmingUpgrade.level - 1]?.split(' ')[0].replace('+', '') || '0') : 300;
 
   const getUserTitle = (balance: number): string => {
     if (balance >= 300000) return 'Legend';
@@ -197,7 +197,7 @@ export default function FarmPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-background/50 p-6 space-y-4 text-center shadow-inner border border-white/5">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-4 text-center">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Farming Claim</h2>
                 <p className="text-3xl font-bold font-mono">
                   {timeToClaim || 'Loading...'}
@@ -215,7 +215,7 @@ export default function FarmPage() {
                 </p>
               </div>
 
-              <div className="rounded-xl bg-background/50 p-6 flex flex-col items-center justify-center shadow-inner border border-white/5">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 flex flex-col items-center justify-center">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center w-full mb-4">Upgrades</h2>
                 <div className="space-y-4 flex flex-col items-center justify-center flex-grow w-full">
                   <p className="text-muted-foreground text-center">
