@@ -8,7 +8,6 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { upgrades as initialUpgrades, type Upgrade } from '@/lib/data';
 import { useState, useEffect } from 'react';
@@ -64,31 +63,29 @@ export function UpgradeSheet({
             {upgrades.map((upgrade) => {
               const Icon = iconMap[upgrade.id] || Gem;
               return (
-              <Card key={upgrade.id} className="bg-card/50">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-8 h-8 text-accent" />
-                    <div>
-                      <CardTitle className="font-headline text-xl">{upgrade.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{upgrade.description}</p>
-                    </div>
+              <div key={upgrade.id} className="bg-card/50 rounded-lg p-4 space-y-4 border">
+                <div className="flex items-center gap-3">
+                  <Icon className="w-8 h-8 text-accent" />
+                  <div>
+                    <h3 className="font-headline text-xl font-semibold leading-none tracking-tight">{upgrade.name}</h3>
+                    <p className="text-sm text-muted-foreground">{upgrade.description}</p>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                </div>
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm min-h-[20px]">
                       <span>Level {upgrade.level} / {upgrade.maxLevel}</span>
                       <span className="font-bold text-primary">{upgrade.benefit}</span>
                   </div>
                   <Progress value={(upgrade.level / upgrade.maxLevel) * 100} className="h-2" />
-                  <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
-                      {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
-                          <>
-                              Upgrade for <RibsIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? upgrade.cost.toLocaleString() : upgrade.cost.toLocaleString('en-US')}
-                          </>
-                      )}
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
+                    {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
+                        <>
+                            Upgrade for <RibsIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? upgrade.cost.toLocaleString() : upgrade.cost.toLocaleString('en-US')}
+                        </>
+                    )}
+                </Button>
+              </div>
             )})}
           </div>
         </ScrollArea>

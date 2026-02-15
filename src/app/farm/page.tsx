@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Gem } from 'lucide-react';
 import { AppLayout } from '@/components/ribs/app-layout';
@@ -194,33 +193,27 @@ export default function FarmPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline">Farming Claim</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 text-center">
-                  <p className="text-3xl font-bold font-mono">
-                    {timeToClaim || 'Loading...'}
-                  </p>
-                  <Button
-                    className="w-full"
-                    onClick={handleClaim}
-                    disabled={timeToClaim !== 'Ready to Claim'}
-                    size="lg"
-                  >
-                    Claim
-                  </Button>
-                  <p className="text-sm text-muted-foreground pt-2">
-                    Farming: 250 RIBS/2hr
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="rounded-lg bg-card/50 p-6 space-y-4 text-center">
+                <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Farming Claim</h2>
+                <p className="text-3xl font-bold font-mono">
+                  {timeToClaim || 'Loading...'}
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={handleClaim}
+                  disabled={timeToClaim !== 'Ready to Claim'}
+                  size="lg"
+                >
+                  Claim
+                </Button>
+                <p className="text-sm text-muted-foreground pt-2">
+                  Farming: 250 RIBS/2hr
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline">Upgrades</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]">
+              <div className="rounded-lg bg-card/50 p-6 flex flex-col items-center justify-center">
+                <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center w-full mb-4">Upgrades</h2>
+                <div className="space-y-4 flex flex-col items-center justify-center flex-grow w-full">
                   <p className="text-muted-foreground text-center">
                     Boost your farming rate and tap power.
                   </p>
@@ -233,8 +226,8 @@ export default function FarmPage() {
                     <Gem className="mr-2 h-4 w-4" />
                     Open Upgrades
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
           <UpgradeSheet

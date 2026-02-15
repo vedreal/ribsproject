@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { tasks } from '@/lib/data';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
@@ -16,25 +15,23 @@ export default function TasksPage() {
 
         <div className="space-y-4">
           {tasks.map((task) => (
-            <Card key={task.id}>
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-primary/10 p-3 rounded-lg">
-                            <task.Icon className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                            <p className="font-semibold">{task.title}</p>
-                            <div className="flex items-center gap-1 text-sm text-primary">
-                                <RibsIcon className="w-3 h-3"/>
-                                <span>+ {task.reward.toLocaleString()}</span>
-                            </div>
+            <div key={task.id} className="border bg-card/50 rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-3 rounded-lg">
+                        <task.Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                        <p className="font-semibold">{task.title}</p>
+                        <div className="flex items-center gap-1 text-sm text-primary">
+                            <RibsIcon className="w-3 h-3"/>
+                            <span>+ {task.reward.toLocaleString()}</span>
                         </div>
                     </div>
-                    <Button asChild variant="secondary">
-                        <Link href={task.href} target="_blank">Go</Link>
-                    </Button>
-                </CardContent>
-            </Card>
+                </div>
+                <Button asChild variant="secondary">
+                    <Link href={task.href} target="_blank">Go</Link>
+                </Button>
+            </div>
           ))}
         </div>
       </div>

@@ -1,7 +1,6 @@
 'use client';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
 import { Copy, Check, Gift } from 'lucide-react';
@@ -45,47 +44,41 @@ export default function ReferralsPage() {
           <p className="text-muted-foreground">Invite friends and earn a percentage of their farm.</p>
         </header>
 
-        <Card className="bg-gradient-to-br from-primary/20 to-accent/20">
-            <CardHeader>
-                <CardTitle className="font-headline text-center">Your Invite Link</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-                <p className="text-center text-sm">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
-                <Button onClick={handleCopy} size="lg" className="w-full max-w-sm font-bold">
-                    {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                    Copy Invite Link
-                </Button>
-            </CardContent>
-        </Card>
+        <div className="rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 p-6 text-center space-y-4">
+            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Invite Link</h2>
+            <p className="text-sm max-w-md mx-auto">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
+            <Button onClick={handleCopy} size="lg" className="w-full max-w-sm font-bold mx-auto">
+                {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                Copy Invite Link
+            </Button>
+        </div>
 
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline">Your Referrals ({referrals.length})</CardTitle>
-                <CardDescription>Users who joined using your link.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <ul className="space-y-3">
-                    {referrals.map((ref, index) => (
-                        <li key={index} className="flex items-center justify-between bg-card p-3 rounded-lg">
-                            <div className="flex items-center gap-3">
-                                <Image
-                                src={`https://picsum.photos/seed/${ref.name}/40/40`}
-                                alt={ref.name}
-                                width={40}
-                                height={40}
-                                className="rounded-full"
-                                data-ai-hint="avatar"
-                                />
-                                <span className="font-medium">{ref.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 font-semibold text-primary">
-                                <Gift className="w-4 h-4" /> +{isMounted ? ref.ribs.toLocaleString() : ref.ribs.toLocaleString('en-US')}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
+        <div className="rounded-lg bg-card/50 p-6 border">
+            <div className="space-y-1.5 mb-6">
+                <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Referrals ({referrals.length})</h2>
+                <p className="text-sm text-muted-foreground">Users who joined using your link.</p>
+            </div>
+            <ul className="space-y-3">
+                {referrals.map((ref, index) => (
+                    <li key={index} className="flex items-center justify-between bg-background/50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3">
+                            <Image
+                            src={`https://picsum.photos/seed/${ref.name}/40/40`}
+                            alt={ref.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                            data-ai-hint="avatar"
+                            />
+                            <span className="font-medium">{ref.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 font-semibold text-primary">
+                            <Gift className="w-4 h-4" /> +{isMounted ? ref.ribs.toLocaleString() : ref.ribs.toLocaleString('en-US')}
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
       </div>
     </AppLayout>
   );

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
 import { Calendar, Users, HelpCircle, Copy, Check } from 'lucide-react';
@@ -12,13 +11,11 @@ import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title: string, value: string | number }) {
     return (
-        <Card className="text-center">
-            <CardContent className="p-4">
-                <Icon className="mx-auto h-8 w-8 text-accent mb-2" />
-                <p className="text-2xl font-bold font-headline">{value}</p>
-                <p className="text-sm text-muted-foreground">{title}</p>
-            </CardContent>
-        </Card>
+        <div className="text-center bg-card/50 rounded-lg p-4 border">
+            <Icon className="mx-auto h-8 w-8 text-accent mb-2" />
+            <p className="text-2xl font-bold font-headline">{value}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
+        </div>
     );
 }
 
@@ -68,29 +65,25 @@ export default function ProfilePage() {
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />
         </div>
 
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline">Referral Link</CardTitle>
-                <CardDescription>Invite friends and earn more RIBS for each referral.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center gap-2">
+        <div className="rounded-lg bg-card/50 p-6 space-y-2 border">
+            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Referral Link</h2>
+            <p className="text-sm text-muted-foreground">Invite friends and earn more RIBS for each referral.</p>
+            <div className="flex items-center gap-2 pt-2">
                 <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
                 <Button size="icon" onClick={handleCopy}>
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline">Submit Email</CardTitle>
-                <CardDescription>Provide your email for important updates and airdrop eligibility.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center gap-2">
+        <div className="rounded-lg bg-card/50 p-6 space-y-2 border">
+            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Submit Email</h2>
+            <p className="text-sm text-muted-foreground">Provide your email for important updates and airdrop eligibility.</p>
+            <div className="flex items-center gap-2 pt-2">
                 <Input type="email" placeholder="your.email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <Button>Submit</Button>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
       </div>
     </AppLayout>
