@@ -66,7 +66,7 @@ export default function FarmPage() {
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (tapsLeft <= 0) return;
 
-    setBalance((prev) => prev + 5);
+    setBalance((prev) => prev + 1);
     setTapsLeft((prev) => prev - 1);
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -117,7 +117,7 @@ export default function FarmPage() {
                 className="tap-float-animation absolute text-3xl font-bold text-primary pointer-events-none"
                 style={{ left: num.x, top: num.y }}
               >
-                +5
+                +1
               </span>
             ))}
           </button>

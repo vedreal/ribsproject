@@ -86,9 +86,9 @@ export const upgrades: Upgrade[] = [
         id: 'tap-power',
         name: 'Tap Power',
         description: 'Increase the amount of LUMION you earn per tap.',
-        level: 6,
-        maxLevel: 10,
-        cost: 8000,
+        level: 1,
+        maxLevel: 3,
+        cost: 1000,
         benefit: '+2 LUM/tap'
     },
     {
