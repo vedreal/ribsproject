@@ -15,7 +15,7 @@ export default function TasksPage() {
 
         <div className="space-y-4">
           {tasks.map((task) => (
-            <div key={task.id} className="border bg-card/50 rounded-lg p-4 flex items-center justify-between">
+            <div key={task.id} className="bg-background/50 rounded-xl p-4 flex items-center justify-between shadow-inner border border-white/5">
                 <div className="flex items-center gap-4">
                     <div className="bg-primary/10 p-3 rounded-lg">
                         <task.Icon className="h-6 w-6 text-primary" />

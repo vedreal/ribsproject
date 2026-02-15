@@ -68,8 +68,8 @@ export type Upgrade = {
     description: string;
     level: number;
     maxLevel: number;
-    cost: number;
-    benefit: string;
+    costs: number[];
+    benefits: string[];
 }
 
 export const upgrades: Upgrade[] = [
@@ -79,17 +79,27 @@ export const upgrades: Upgrade[] = [
         description: 'Increase the amount of RIBS you earn from passive farming.',
         level: 1,
         maxLevel: 10,
-        cost: 2500,
-        benefit: '+50 RIBS/2hr'
+        costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
+        benefits: [
+            '+300 RIBS/2hr',
+            '+350 RIBS/2hr',
+            '+400 RIBS/2hr',
+            '+450 RIBS/2hr',
+            '+500 RIBS/2hr',
+            '+550 RIBS/2hr',
+            '+600 RIBS/2hr',
+            '+650 RIBS/2hr',
+            '+700 RIBS/2hr'
+        ]
     },
     {
         id: 'tap-power',
         name: 'Tap Power',
         description: 'Increase the amount of RIBS you earn per tap.',
-        level: 2,
+        level: 1,
         maxLevel: 3,
-        cost: 3000,
-        benefit: '+5 RIBS/tap'
+        costs: [3000, 6000],
+        benefits: ['+5 RIBS/tap', '+10 RIBS/tap']
     },
     {
         id: 'tap-energy',
@@ -97,7 +107,7 @@ export const upgrades: Upgrade[] = [
         description: 'Increase your maximum daily tap limit.',
         level: 1,
         maxLevel: 3,
-        cost: 5000,
-        benefit: '+1000 Taps'
+        costs: [5000, 10000],
+        benefits: ['+1000 Taps', '+2000 Taps']
     }
 ]

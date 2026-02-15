@@ -8,6 +8,7 @@ import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
+import { upgrades } from '@/lib/data';
 
 type FloatingNumber = {
   id: number;
@@ -26,6 +27,9 @@ export default function FarmPage() {
   const [isUpgradeSheetOpen, setIsUpgradeSheetOpen] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+
+  const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
+  const farmingBenefit = farmingUpgrade ? 200 + farmingUpgrade.level * 50 : 250;
 
   const getUserTitle = (balance: number): string => {
     if (balance >= 300000) return 'Legend';
@@ -193,7 +197,7 @@ export default function FarmPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-lg bg-card/50 p-6 space-y-4 text-center">
+              <div className="rounded-xl bg-background/50 p-6 space-y-4 text-center shadow-inner border border-white/5">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Farming Claim</h2>
                 <p className="text-3xl font-bold font-mono">
                   {timeToClaim || 'Loading...'}
@@ -207,11 +211,11 @@ export default function FarmPage() {
                   Claim
                 </Button>
                 <p className="text-sm text-muted-foreground pt-2">
-                  Farming: 250 RIBS/2hr
+                  Farming: {farmingBenefit} RIBS/2hr
                 </p>
               </div>
 
-              <div className="rounded-lg bg-card/50 p-6 flex flex-col items-center justify-center">
+              <div className="rounded-xl bg-background/50 p-6 flex flex-col items-center justify-center shadow-inner border border-white/5">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center w-full mb-4">Upgrades</h2>
                 <div className="space-y-4 flex flex-col items-center justify-center flex-grow w-full">
                   <p className="text-muted-foreground text-center">

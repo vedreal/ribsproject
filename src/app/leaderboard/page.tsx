@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
           <p className="text-muted-foreground">See the current player rankings.</p>
         </header>
 
-        <div className="rounded-lg bg-card/50 overflow-hidden border">
+        <div className="rounded-xl bg-background/50 overflow-hidden shadow-inner border border-white/5">
           <Table>
             <TableHeader>
               <TableRow>
