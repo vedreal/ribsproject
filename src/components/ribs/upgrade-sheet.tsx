@@ -60,7 +60,7 @@ export function UpgradeSheet({
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1">
-          <div className="py-4 space-y-4 pr-6">
+          <div className="py-4 space-y-4">
             {upgrades.map((upgrade) => {
               const Icon = iconMap[upgrade.id] || Gem;
               return (
