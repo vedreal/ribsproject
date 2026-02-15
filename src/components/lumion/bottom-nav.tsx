@@ -9,7 +9,7 @@ const navItems = [
   { href: '/farm', label: 'Farm', icon: Flame },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/referrals', label: 'Refs', icon: Users },
-  { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { href: '/leaderboard', label: 'Rank', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
@@ -17,15 +17,15 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-4 inset-x-0 mx-auto h-16 w-[95%] max-w-sm bg-card/80 backdrop-blur-xl rounded-lg border border-border/50 shadow-2xl z-50">
-      <div className="flex h-full items-center justify-evenly">
+    <nav className="fixed bottom-4 inset-x-0 mx-auto h-16 w-max min-w-[95%] max-w-sm bg-card/80 backdrop-blur-xl rounded-lg border border-border/50 shadow-2xl z-50">
+      <div className="flex h-full items-center justify-evenly gap-x-2 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="group flex flex-col items-center justify-center gap-1.5 h-full focus:outline-none"
+              className="group flex flex-col items-center justify-center gap-1.5 h-full w-16 focus:outline-none"
             >
               <div
                 className={cn(

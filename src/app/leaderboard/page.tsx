@@ -18,8 +18,8 @@ export default function LeaderboardPage() {
     <AppLayout>
       <div className="space-y-8">
         <header className="text-center">
-          <h1 className="text-4xl font-headline font-bold">Leaderboard</h1>
-          <p className="text-muted-foreground">See who is leading the Lumion Farm.</p>
+          <h1 className="text-4xl font-headline font-bold">Rank</h1>
+          <p className="text-muted-foreground">See the current player rankings.</p>
         </header>
 
         <Card>
