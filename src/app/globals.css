@@ -84,6 +84,18 @@
   position: relative;
 }
 
+.bg-bottom-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, hsla(0, 0%, 100%, 0.1), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .bg-bottom-gradient::after {
   content: '';
   position: absolute;
