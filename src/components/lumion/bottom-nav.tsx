@@ -17,15 +17,15 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-4 inset-x-0 mx-auto h-16 w-max min-w-[95%] max-w-sm bg-card/80 backdrop-blur-xl rounded-lg border border-border/50 shadow-2xl z-50">
-      <div className="flex h-full items-center justify-evenly gap-x-2 px-2">
+    <nav className="fixed bottom-4 inset-x-0 mx-auto h-16 w-max max-w-sm bg-card/80 backdrop-blur-xl rounded-lg border border-border/50 shadow-2xl z-50">
+      <div className="flex h-full items-center justify-center gap-x-6 px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="group flex flex-col items-center justify-center gap-1.5 h-full w-16 focus:outline-none"
+              className="group flex flex-col items-center justify-center gap-1 h-full focus:outline-none"
             >
               <div
                 className={cn(
