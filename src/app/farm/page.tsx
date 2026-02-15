@@ -119,11 +119,6 @@ export default function FarmPage() {
 
   return (
     <>
-      <img
-        src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeiel3xnna3wbvvinhp4g45nxdb2boilu6ub576tiojd6avd6nsrvsy"
-        alt="Farm background"
-        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
-      />
       <AppLayout>
         <div className="relative pt-8">
           <div className="absolute top-0 right-0">
