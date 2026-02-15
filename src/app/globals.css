@@ -72,3 +72,26 @@
 .tap-float-animation {
   animation: tap-float 1.5s ease-out forwards;
 }
+
+.silver-gradient-card {
+  background: linear-gradient(145deg, hsl(210 10% 30%), hsl(210 15% 15%));
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border) / 0.3);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.bg-bottom-gradient {
+  position: relative;
+}
+
+.bg-bottom-gradient::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, hsl(var(--accent) / 0.1), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
