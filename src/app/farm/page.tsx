@@ -127,7 +127,7 @@ export default function FarmPage() {
         className="fixed top-0 left-0 w-full h-full object-cover -z-10"
       >
         <source
-          src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeiaavyl7hho24c43qexwmejtmgkvqlkn4j6kwm3tntih3wfu2wsibm"
+          src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeiel3xnna3wbvvinhp4g45nxdb2boilu6ub576tiojd6avd6nsrvsy"
           type="video/mp4"
         />
       </video>
