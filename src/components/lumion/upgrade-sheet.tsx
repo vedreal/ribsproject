@@ -19,7 +19,7 @@ import { Flame, Zap, Gem } from 'lucide-react';
 const iconMap: { [key: string]: React.FC<any> } = {
     'farming-rate': Flame,
     'tap-power': Zap,
-    'energy-cap': Gem,
+    'tap-energy': Gem,
 };
 
 export function UpgradeSheet({

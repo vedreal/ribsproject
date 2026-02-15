@@ -92,12 +92,12 @@ export const upgrades: Upgrade[] = [
         benefit: '+2 LUM/tap'
     },
     {
-        id: 'energy-cap',
-        name: 'Energy Cap',
+        id: 'tap-energy',
+        name: 'Tap Energy',
         description: 'Increase your maximum daily tap limit.',
-        level: 2,
-        maxLevel: 10,
-        cost: 25000,
-        benefit: '+500 Taps'
+        level: 1,
+        maxLevel: 3,
+        cost: 5000,
+        benefit: '+1000 Taps'
     }
 ]
