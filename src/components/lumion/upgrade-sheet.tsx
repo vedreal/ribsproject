@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { LumionIcon } from './lumion-icon';
 import { toast } from '@/hooks/use-toast';
 import { Flame, Zap, Gem } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const iconMap: { [key: string]: React.FC<any> } = {
     'farming-rate': Flame,
@@ -51,48 +52,50 @@ export function UpgradeSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="max-w-lg w-full">
+      <SheetContent className="max-w-lg w-full flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-headline text-3xl">Upgrades</SheetTitle>
           <SheetDescription>
             Increase your LUMION income by upgrading your farm.
           </SheetDescription>
         </SheetHeader>
-        <div className="py-4 space-y-4">
-          {upgrades.map((upgrade) => {
-            const Icon = iconMap[upgrade.id] || Gem;
-            return (
-            <Card key={upgrade.id} className="bg-card/50">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Icon className="w-8 h-8 text-accent" />
-                  <div>
-                    <CardTitle className="font-headline text-xl">{upgrade.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{upgrade.description}</p>
+        <ScrollArea className="flex-1">
+          <div className="py-4 space-y-4 pr-6">
+            {upgrades.map((upgrade) => {
+              const Icon = iconMap[upgrade.id] || Gem;
+              return (
+              <Card key={upgrade.id} className="bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-8 h-8 text-accent" />
+                    <div>
+                      <CardTitle className="font-headline text-xl">{upgrade.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{upgrade.description}</p>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className={`flex items-center text-sm min-h-[20px] ${upgrade.id === 'tap-power' ? 'justify-end' : 'justify-between'}`}>
-                    {upgrade.id !== 'tap-power' &&
-                        <span>Level {upgrade.level} / {upgrade.maxLevel}</span>
-                    }
-                    <span className="font-bold text-primary">{upgrade.benefit}</span>
-                </div>
-                {upgrade.id !== 'tap-power' &&
-                    <Progress value={(upgrade.level / upgrade.maxLevel) * 100} className="h-2" />
-                }
-                <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
-                    {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
-                        <>
-                            Upgrade for <LumionIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? upgrade.cost.toLocaleString() : upgrade.cost.toLocaleString('en-US')}
-                        </>
-                    )}
-                </Button>
-              </CardContent>
-            </Card>
-          )})}
-        </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className={`flex items-center text-sm min-h-[20px] ${upgrade.id === 'tap-power' ? 'justify-end' : 'justify-between'}`}>
+                      {upgrade.id !== 'tap-power' &&
+                          <span>Level {upgrade.level} / {upgrade.maxLevel}</span>
+                      }
+                      <span className="font-bold text-primary">{upgrade.benefit}</span>
+                  </div>
+                  {upgrade.id !== 'tap-power' &&
+                      <Progress value={(upgrade.level / upgrade.maxLevel) * 100} className="h-2" />
+                  }
+                  <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
+                      {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
+                          <>
+                              Upgrade for <LumionIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? upgrade.cost.toLocaleString() : upgrade.cost.toLocaleString('en-US')}
+                          </>
+                      )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )})}
+          </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
