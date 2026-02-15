@@ -121,11 +121,20 @@ export default function FarmPage() {
               </span>
             ))}
           </button>
-          <div className="w-full max-w-xs text-center space-y-1">
-            <p className="text-lg font-bold">
-              {isMounted ? tapsLeft.toLocaleString('en-US') : '...'} / {DAILY_TAPS.toLocaleString('en-US')}
-            </p>
-            <Progress value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0} className="h-3" />
+          <div className="w-full max-w-xs text-center space-y-1" style={{minHeight: '44px'}}>
+             {isMounted && tapsLeft <= 0 ? (
+              <div className="flex flex-col justify-center h-full pt-1">
+                <p className="font-bold text-primary">Daily tap limit reached</p>
+                <p className="text-sm text-muted-foreground">Come back tomorrow!</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-lg font-bold">
+                  {isMounted ? tapsLeft.toLocaleString('en-US') : '...'} / {DAILY_TAPS.toLocaleString('en-US')}
+                </p>
+                <Progress value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0} className="h-3" />
+              </>
+            )}
           </div>
         </div>
 
