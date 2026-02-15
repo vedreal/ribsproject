@@ -75,15 +75,11 @@ export function UpgradeSheet({
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className={`flex items-center text-sm min-h-[20px] ${upgrade.id === 'tap-power' ? 'justify-end' : 'justify-between'}`}>
-                      {upgrade.id !== 'tap-power' &&
-                          <span>Level {upgrade.level} / {upgrade.maxLevel}</span>
-                      }
+                  <div className="flex items-center justify-between text-sm min-h-[20px]">
+                      <span>Level {upgrade.level} / {upgrade.maxLevel}</span>
                       <span className="font-bold text-primary">{upgrade.benefit}</span>
                   </div>
-                  {upgrade.id !== 'tap-power' &&
-                      <Progress value={(upgrade.level / upgrade.maxLevel) * 100} className="h-2" />
-                  }
+                  <Progress value={(upgrade.level / upgrade.maxLevel) * 100} className="h-2" />
                   <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={upgrade.level >= upgrade.maxLevel}>
                       {upgrade.level >= upgrade.maxLevel ? 'Max Level' : (
                           <>
