@@ -28,6 +28,17 @@ export default function FarmPage() {
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
+  const getUserTitle = (balance: number): string => {
+    if (balance >= 300000) return 'Legend';
+    if (balance >= 100000) return 'Grandmaster';
+    if (balance >= 50000) return 'Master';
+    if (balance >= 25000) return 'Elite';
+    if (balance >= 10000) return 'Skilled';
+    return 'Beginner';
+  };
+
+  const userTitle = getUserTitle(balance);
+
   useEffect(() => {
     // Initialize client-side state
     setClaimTime(Date.now() + TWO_HOURS_IN_MS);
@@ -91,99 +102,106 @@ export default function FarmPage() {
 
   return (
     <AppLayout>
-      <div className="text-center space-y-8">
-        <div>
-          <h1 className="font-headline text-5xl font-bold text-primary">
-            {isMounted ? balance.toLocaleString('en-US') : balance.toLocaleString('en-US')}
-          </h1>
-          <p className="text-muted-foreground flex items-center justify-center gap-2">
-            <RibsIcon className="w-5 h-5" /> Your RIBS Balance
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center space-y-4">
-          <button
-            onClick={handleTap}
-            disabled={tapsLeft <= 0}
-            className={cn(
-                "relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
-                "flex items-center justify-center text-center"
-            )}
-          >
-            <RibsIcon className="w-24 h-24 text-primary" />
-             {floatingNumbers.map((num) => (
-              <span
-                key={num.id}
-                className="tap-float-animation absolute text-3xl font-bold text-primary pointer-events-none"
-                style={{ left: num.x, top: num.y }}
-              >
-                +1
-              </span>
-            ))}
-          </button>
-          <div className="w-full max-w-xs text-center space-y-1" style={{minHeight: '44px'}}>
-             {isMounted && tapsLeft <= 0 ? (
-              <div className="flex flex-col justify-center h-full pt-1">
-                <p className="font-bold text-primary">Daily tap limit reached</p>
-                <p className="text-sm text-muted-foreground">Come back tomorrow!</p>
-              </div>
-            ) : (
-              <>
-                <p className="text-lg font-bold">
-                  {isMounted ? tapsLeft.toLocaleString('en-US') : '...'} / {DAILY_TAPS.toLocaleString('en-US')}
-                </p>
-                <Progress value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0} className="h-3" />
-              </>
-            )}
+      <div className="relative pt-8">
+        <div className="absolute top-0 right-0">
+          <div className="bg-secondary text-secondary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+            {userTitle}
           </div>
         </div>
+        <div className="text-center space-y-8">
+          <div>
+            <h1 className="font-headline text-5xl font-bold text-primary">
+              {isMounted ? balance.toLocaleString('en-US') : balance.toLocaleString('en-US')}
+            </h1>
+            <p className="text-muted-foreground flex items-center justify-center gap-2">
+              <RibsIcon className="w-5 h-5" /> Your RIBS Balance
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">Farming Claim</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-center">
-              <p className="text-3xl font-bold font-mono">
-                {timeToClaim || 'Loading...'}
-              </p>
-              <Button
-                className="w-full"
-                onClick={handleClaim}
-                disabled={timeToClaim !== 'Ready to Claim'}
-                size="lg"
-              >
-                Claim
-              </Button>
-              <p className="text-sm text-muted-foreground pt-2">Farming: 250 RIBS/2hr</p>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center space-y-4">
+            <button
+              onClick={handleTap}
+              disabled={tapsLeft <= 0}
+              className={cn(
+                  "relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                  "flex items-center justify-center text-center"
+              )}
+            >
+              <RibsIcon className="w-24 h-24 text-primary" />
+               {floatingNumbers.map((num) => (
+                <span
+                  key={num.id}
+                  className="tap-float-animation absolute text-3xl font-bold text-primary pointer-events-none"
+                  style={{ left: num.x, top: num.y }}
+                >
+                  +1
+                </span>
+              ))}
+            </button>
+            <div className="w-full max-w-xs text-center space-y-1" style={{minHeight: '44px'}}>
+               {isMounted && tapsLeft <= 0 ? (
+                <div className="flex flex-col justify-center h-full pt-1">
+                  <p className="font-bold text-primary">Daily tap limit reached</p>
+                  <p className="text-sm text-muted-foreground">Come back tomorrow!</p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-lg font-bold">
+                    {isMounted ? tapsLeft.toLocaleString('en-US') : '...'} / {DAILY_TAPS.toLocaleString('en-US')}
+                  </p>
+                  <Progress value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0} className="h-3" />
+                </>
+              )}
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">Upgrades</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]">
-              <p className="text-muted-foreground text-center">
-                Boost your farming rate and tap power.
-              </p>
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => setIsUpgradeSheetOpen(true)}
-                size="lg"
-              >
-                <Gem className="mr-2 h-4 w-4" />
-                Open Upgrades
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Farming Claim</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-center">
+                <p className="text-3xl font-bold font-mono">
+                  {timeToClaim || 'Loading...'}
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={handleClaim}
+                  disabled={timeToClaim !== 'Ready to Claim'}
+                  size="lg"
+                >
+                  Claim
+                </Button>
+                <p className="text-sm text-muted-foreground pt-2">Farming: 250 RIBS/2hr</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Upgrades</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 flex flex-col items-center justify-center h-[calc(100%-4rem)]">
+                <p className="text-muted-foreground text-center">
+                  Boost your farming rate and tap power.
+                </p>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => setIsUpgradeSheetOpen(true)}
+                  size="lg"
+                >
+                  <Gem className="mr-2 h-4 w-4" />
+                  Open Upgrades
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+        <UpgradeSheet
+          isOpen={isUpgradeSheetOpen}
+          onOpenChange={setIsUpgradeSheetOpen}
+        />
       </div>
-      <UpgradeSheet
-        isOpen={isUpgradeSheetOpen}
-        onOpenChange={setIsUpgradeSheetOpen}
-      />
     </AppLayout>
   );
 }
