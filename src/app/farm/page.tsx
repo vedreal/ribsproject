@@ -39,6 +39,23 @@ export default function FarmPage() {
 
   const userTitle = getUserTitle(balance);
 
+  const getTitleClasses = (title: string): string => {
+    switch (title) {
+      case 'Legend':
+        return 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black';
+      case 'Grandmaster':
+        return 'bg-gradient-to-r from-orange-500 to-red-600 text-white';
+      case 'Master':
+        return 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white';
+      case 'Elite':
+        return 'bg-gradient-to-r from-green-400 to-teal-500 text-white';
+      case 'Skilled':
+        return 'bg-gradient-to-r from-blue-400 to-cyan-500 text-white';
+      default: // Beginner
+        return 'bg-secondary text-secondary-foreground';
+    }
+  };
+
   useEffect(() => {
     // Initialize client-side state
     setClaimTime(Date.now() + TWO_HOURS_IN_MS);
@@ -104,7 +121,12 @@ export default function FarmPage() {
     <AppLayout>
       <div className="relative pt-8">
         <div className="absolute top-0 right-0">
-          <div className="bg-secondary text-secondary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+          <div
+            className={cn(
+              'text-xs font-bold px-3 py-1.5 rounded-full shadow-md',
+              getTitleClasses(userTitle)
+            )}
+          >
             {userTitle}
           </div>
         </div>
