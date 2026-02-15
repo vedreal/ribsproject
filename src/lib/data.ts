@@ -36,27 +36,27 @@ export type LeaderboardUser = {
   rank: number;
   username: string;
   avatarSeed: string;
-  lumions: number;
+  ribs: number;
   isCurrentUser?: boolean;
 };
 
 export const leaderboardData: LeaderboardUser[] = [
-    { rank: 1, username: 'cypher', avatarSeed: 'cypher', lumions: 12500000, },
-    { rank: 2, username: 'vortex', avatarSeed: 'vortex', lumions: 11800000, },
-    { rank: 3, username: 'nova', avatarSeed: 'nova', lumions: 11200000, },
-    { rank: 4, username: 'zenith', avatarSeed: 'zenith', lumions: 10500000, },
-    { rank: 5, username: 'You', avatarSeed: 'you', lumions: 9800000, isCurrentUser: true },
-    { rank: 6, username: 'echo', avatarSeed: 'echo', lumions: 9200000, },
-    { rank: 7, username: 'pulse', avatarSeed: 'pulse', lumions: 8500000, },
-    { rank: 8, username: 'triton', avatarSeed: 'triton', lumions: 7800000, },
-    { rank: 9, username: 'solaris', avatarSeed: 'solaris', lumions: 7100000, },
-    { rank: 10, username: 'lyra', avatarSeed: 'lyra', lumions: 6400000, },
+    { rank: 1, username: 'cypher', avatarSeed: 'cypher', ribs: 12500000, },
+    { rank: 2, username: 'vortex', avatarSeed: 'vortex', ribs: 11800000, },
+    { rank: 3, username: 'nova', avatarSeed: 'nova', ribs: 11200000, },
+    { rank: 4, username: 'zenith', avatarSeed: 'zenith', ribs: 10500000, },
+    { rank: 5, username: 'You', avatarSeed: 'you', ribs: 9800000, isCurrentUser: true },
+    { rank: 6, username: 'echo', avatarSeed: 'echo', ribs: 9200000, },
+    { rank: 7, username: 'pulse', avatarSeed: 'pulse', ribs: 8500000, },
+    { rank: 8, username: 'triton', avatarSeed: 'triton', ribs: 7800000, },
+    { rank: 9, username: 'solaris', avatarSeed: 'solaris', ribs: 7100000, },
+    { rank: 10, username: 'lyra', avatarSeed: 'lyra', ribs: 6400000, },
 ];
 
 export const userProfile = {
     username: 'Zenith',
     joinDate: '15-07-2024',
-    totalLumions: 9800000,
+    totalRibs: 9800000,
     totalReferrals: 12,
     referralCode: 'ZENITHFARM123',
     email: 'zenith@example.com'
@@ -76,20 +76,20 @@ export const upgrades: Upgrade[] = [
     {
         id: 'farming-rate',
         name: 'Farming Rate',
-        description: 'Increase the amount of LUMION you earn per hour.',
+        description: 'Increase the amount of RIBS you earn per hour.',
         level: 4,
         maxLevel: 10,
         cost: 12000,
-        benefit: '+100 LUM/hr'
+        benefit: '+100 RIBS/hr'
     },
     {
         id: 'tap-power',
         name: 'Tap Power',
-        description: 'Increase the amount of LUMION you earn per tap.',
+        description: 'Increase the amount of RIBS you earn per tap.',
         level: 1,
         maxLevel: 3,
         cost: 1000,
-        benefit: '+2 LUM/tap'
+        benefit: '+2 RIBS/tap'
     },
     {
         id: 'tap-energy',

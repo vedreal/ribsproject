@@ -8,10 +8,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AppLayout } from '@/components/lumion/app-layout';
+import { AppLayout } from '@/components/ribs/app-layout';
 import { leaderboardData } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { LumionIcon } from '@/components/lumion/lumion-icon';
+import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 export default function LeaderboardPage() {
   return (
@@ -29,7 +29,7 @@ export default function LeaderboardPage() {
                 <TableRow>
                   <TableHead className="w-[80px]">Rank</TableHead>
                   <TableHead>Player</TableHead>
-                  <TableHead className="text-right">Lumions</TableHead>
+                  <TableHead className="text-right">RIBS</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -57,7 +57,7 @@ export default function LeaderboardPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2 font-semibold">
-                       <LumionIcon className="w-4 h-4" /> {user.lumions.toLocaleString()}
+                       <RibsIcon className="w-4 h-4" /> {user.ribs.toLocaleString()}
                       </div>
                     </TableCell>
                   </TableRow>

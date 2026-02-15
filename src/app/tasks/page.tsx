@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AppLayout } from '@/components/lumion/app-layout';
+import { AppLayout } from '@/components/ribs/app-layout';
 import { tasks } from '@/lib/data';
-import { LumionIcon } from '@/components/lumion/lumion-icon';
+import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 export default function TasksPage() {
   return (
@@ -11,7 +11,7 @@ export default function TasksPage() {
       <div className="space-y-8">
         <header className="text-center">
           <h1 className="text-4xl font-headline font-bold">Tasks</h1>
-          <p className="text-muted-foreground">Complete tasks to earn more LUMION.</p>
+          <p className="text-muted-foreground">Complete tasks to earn more RIBS.</p>
         </header>
 
         <div className="space-y-4">
@@ -25,7 +25,7 @@ export default function TasksPage() {
                         <div>
                             <p className="font-semibold">{task.title}</p>
                             <div className="flex items-center gap-1 text-sm text-primary">
-                                <LumionIcon className="w-3 h-3"/>
+                                <RibsIcon className="w-3 h-3"/>
                                 <span>+ {task.reward.toLocaleString()}</span>
                             </div>
                         </div>

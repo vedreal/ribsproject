@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Lumion Farm',
-  description: 'Farm LUMION coins in the new Telegram mini-app.',
+  title: 'RIBS Farm',
+  description: 'Farm RIBS coins in the new Telegram mini-app.',
 };
 
 export default function RootLayout({

@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Gem } from 'lucide-react';
-import { AppLayout } from '@/components/lumion/app-layout';
-import { LumionIcon } from '@/components/lumion/lumion-icon';
-import { UpgradeSheet } from '@/components/lumion/upgrade-sheet';
+import { AppLayout } from '@/components/ribs/app-layout';
+import { RibsIcon } from '@/components/ribs/ribs-icon';
+import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
 
 type FloatingNumber = {
@@ -97,7 +97,7 @@ export default function FarmPage() {
             {isMounted ? balance.toLocaleString('en-US') : balance.toLocaleString('en-US')}
           </h1>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
-            <LumionIcon className="w-5 h-5" /> Your LUMION Balance
+            <RibsIcon className="w-5 h-5" /> Your RIBS Balance
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export default function FarmPage() {
                 "flex items-center justify-center text-center"
             )}
           >
-            <LumionIcon className="w-24 h-24 text-primary" />
+            <RibsIcon className="w-24 h-24 text-primary" />
              {floatingNumbers.map((num) => (
               <span
                 key={num.id}

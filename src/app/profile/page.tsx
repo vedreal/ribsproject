@@ -4,11 +4,11 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AppLayout } from '@/components/lumion/app-layout';
+import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
 import { Calendar, Users, HelpCircle, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { LumionIcon } from '@/components/lumion/lumion-icon';
+import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title: string, value: string | number }) {
     return (
@@ -33,7 +33,7 @@ export default function ProfilePage() {
     }, []);
 
     const handleCopy = () => {
-        const referralLink = `https://t.me/lumion_bot?start=${userProfile.referralCode}`;
+        const referralLink = `https://t.me/ribs_bot?start=${userProfile.referralCode}`;
         navigator.clipboard.writeText(referralLink);
         setIsCopied(true);
         toast({
@@ -62,7 +62,7 @@ export default function ProfilePage() {
         </header>
 
         <div className="grid grid-cols-2 gap-4">
-            <StatCard icon={LumionIcon} title="Total Lumions" value={isMounted ? userProfile.totalLumions.toLocaleString() : userProfile.totalLumions.toLocaleString('en-US')} />
+            <StatCard icon={RibsIcon} title="Total RIBS" value={isMounted ? userProfile.totalRibs.toLocaleString() : userProfile.totalRibs.toLocaleString('en-US')} />
             <StatCard icon={Users} title="Total Referrals" value={userProfile.totalReferrals} />
             <StatCard icon={Calendar} title="Join Date" value={userProfile.joinDate} />
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />
@@ -71,10 +71,10 @@ export default function ProfilePage() {
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline">Referral Link</CardTitle>
-                <CardDescription>Invite friends and earn more LUMION for each referral.</CardDescription>
+                <CardDescription>Invite friends and earn more RIBS for each referral.</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center gap-2">
-                <Input type="text" readOnly value={`https://t.me/lumion_bot?start=${userProfile.referralCode}`} />
+                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
                 <Button size="icon" onClick={handleCopy}>
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>

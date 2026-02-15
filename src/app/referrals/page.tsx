@@ -2,19 +2,19 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AppLayout } from '@/components/lumion/app-layout';
+import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
 import { Copy, Check, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { LumionIcon } from '@/components/lumion/lumion-icon';
+import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 const referrals = [
-    { name: 'cypher', lumions: 10000 },
-    { name: 'vortex', lumions: 10000 },
-    { name: 'nova', lumions: 5000 },
-    { name: 'echo', lumions: 5000 },
-    { name: 'pulse', lumions: 2500 },
+    { name: 'cypher', ribs: 10000 },
+    { name: 'vortex', ribs: 10000 },
+    { name: 'nova', ribs: 5000 },
+    { name: 'echo', ribs: 5000 },
+    { name: 'pulse', ribs: 2500 },
 ];
 
 export default function ReferralsPage() {
@@ -27,7 +27,7 @@ export default function ReferralsPage() {
     }, []);
 
     const handleCopy = () => {
-        const referralLink = `https://t.me/lumion_bot?start=${userProfile.referralCode}`;
+        const referralLink = `https://t.me/ribs_bot?start=${userProfile.referralCode}`;
         navigator.clipboard.writeText(referralLink);
         setIsCopied(true);
         toast({
@@ -50,7 +50,7 @@ export default function ReferralsPage() {
                 <CardTitle className="font-headline text-center">Your Invite Link</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-                <p className="text-center text-sm">Share this link with your friends. You'll get bonus LUMION when they join and play.</p>
+                <p className="text-center text-sm">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
                 <Button onClick={handleCopy} size="lg" className="w-full max-w-sm font-bold">
                     {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
                     Copy Invite Link
@@ -79,7 +79,7 @@ export default function ReferralsPage() {
                                 <span className="font-medium">{ref.name}</span>
                             </div>
                             <div className="flex items-center gap-2 font-semibold text-primary">
-                                <Gift className="w-4 h-4" /> +{isMounted ? ref.lumions.toLocaleString() : ref.lumions.toLocaleString('en-US')}
+                                <Gift className="w-4 h-4" /> +{isMounted ? ref.ribs.toLocaleString() : ref.ribs.toLocaleString('en-US')}
                             </div>
                         </li>
                     ))}
