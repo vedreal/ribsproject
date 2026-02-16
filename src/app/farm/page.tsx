@@ -16,7 +16,7 @@ type FloatingNumber = {
   y: number;
 };
 
-const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
+const CLAIM_DURATION_MS = 5 * 1000; // Temporarily set to 5 seconds for testing
 const DAILY_TAPS = 1000;
 
 export default function FarmPage() {
@@ -29,7 +29,8 @@ export default function FarmPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
-  const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1]?.split(' ')[0].replace('+', '') || '0' : 300;
+  const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1] : '...';
+
 
   const getUserTitle = (balance: number): string => {
     if (balance >= 300000) return 'Legend';
@@ -61,7 +62,7 @@ export default function FarmPage() {
 
   useEffect(() => {
     // Initialize client-side state
-    setClaimTime(Date.now() + TWO_HOURS_IN_MS);
+    setClaimTime(Date.now() + CLAIM_DURATION_MS);
     setTapsLeft(850); // Example
     setIsMounted(true);
   }, []);
@@ -117,7 +118,7 @@ export default function FarmPage() {
 
   const handleClaim = () => {
     setBalance((prev) => prev + 10000); // Example claim amount
-    setClaimTime(Date.now() + TWO_HOURS_IN_MS);
+    setClaimTime(Date.now() + CLAIM_DURATION_MS);
   };
 
   return (
@@ -199,7 +200,7 @@ export default function FarmPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="inset-card p-6 space-y-4">
                 <div className="flex justify-between items-center">
-                  <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim</h2>
+                  <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
                     <p className="text-3xl font-bold font-mono">
                       {timeToClaim || 'Loading...'}
@@ -211,7 +212,7 @@ export default function FarmPage() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Faucet Rate: {farmingBenefit} RIBS/2hr
+                  Faucet Rate : {farmingBenefit}
                 </p>
               </div>
 
