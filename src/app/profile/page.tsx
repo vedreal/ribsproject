@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
-import { Calendar, Users, HelpCircle, Copy, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Calendar, Users, HelpCircle } from 'lucide-react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title: string, value: string | number }) {
@@ -20,25 +19,12 @@ function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title
 }
 
 export default function ProfilePage() {
-    const { toast } = useToast();
     const [email, setEmail] = useState(userProfile.email || '');
-    const [isCopied, setIsCopied] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
-
-    const handleCopy = () => {
-        const referralLink = `https://t.me/ribs_bot?start=${userProfile.referralCode}`;
-        navigator.clipboard.writeText(referralLink);
-        setIsCopied(true);
-        toast({
-            title: 'Copied to clipboard!',
-            description: 'Your referral link is ready to be shared.',
-        });
-        setTimeout(() => setIsCopied(false), 2000);
-    };
 
   return (
     <AppLayout>
@@ -63,17 +49,6 @@ export default function ProfilePage() {
             <StatCard icon={Users} title="Total Referrals" value={userProfile.totalReferrals} />
             <StatCard icon={Calendar} title="Join Date" value={userProfile.joinDate} />
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />
-        </div>
-
-        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-2">
-            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Referral Link</h2>
-            <p className="text-sm text-muted-foreground">Invite friends and earn more RIBS for each referral.</p>
-            <div className="flex items-center gap-2 pt-2">
-                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
-                <Button size="icon" onClick={handleCopy}>
-                    {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-            </div>
         </div>
 
         <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-2">

@@ -7,6 +7,7 @@ import { Copy, Check, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
+import { Input } from '@/components/ui/input';
 
 const referrals = [
     { name: 'cypher', ribs: 10000 },
@@ -44,13 +45,15 @@ export default function ReferralsPage() {
           <p className="text-muted-foreground">Invite friends and earn a percentage of their farm.</p>
         </header>
 
-        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 text-center space-y-4">
+        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-2">
             <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Invite Link</h2>
-            <p className="text-sm max-w-md mx-auto">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
-            <Button onClick={handleCopy} size="lg" className="w-full max-w-sm font-bold mx-auto">
-                {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                Copy Invite Link
-            </Button>
+            <p className="text-sm text-muted-foreground">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
+            <div className="flex items-center gap-2 pt-2">
+                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
+                <Button size="icon" onClick={handleCopy}>
+                    {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+            </div>
         </div>
 
         <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6">
