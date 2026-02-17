@@ -65,8 +65,11 @@ export default function SpinPage() {
     const selectedReward = rewards[randomRewardIndex];
 
     const baseRotation = wheelRotation - (wheelRotation % 360);
+    
+    // conic-gradient starts at 12 o'clock (0deg). The pointer is at 3 o'clock (90deg).
+    // We need to align the center of the winning segment with the 90deg pointer.
     const targetRotation =
-      baseRotation + 360 * 5 - randomRewardIndex * segmentAngle - (segmentAngle / 2);
+      baseRotation + 360 * 5 + 90 - (randomRewardIndex * segmentAngle + segmentAngle / 2);
 
     setWheelRotation(targetRotation);
 
