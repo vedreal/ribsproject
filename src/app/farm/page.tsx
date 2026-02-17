@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Gem } from 'lucide-react';
+import { Gem, CalendarCheck } from 'lucide-react';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
 import { upgrades } from '@/lib/data';
+import { useToast } from '@/hooks/use-toast';
 
 type FloatingNumber = {
   id: number;
@@ -26,6 +27,9 @@ export default function FarmPage() {
   const [timeToClaim, setTimeToClaim] = useState('');
   const [isUpgradeSheetOpen, setIsUpgradeSheetOpen] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
+  const [checkInCount, setCheckInCount] = useState(1);
+  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
+  const { toast } = useToast();
 
   const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
   const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1] : '...';
@@ -92,6 +96,20 @@ export default function FarmPage() {
     return () => clearInterval(interval);
   }, [claimTime]);
 
+  const handleCheckIn = () => {
+    if (hasCheckedInToday) return;
+
+    const rewardAmount = 500 * checkInCount;
+    setBalance(prev => prev + rewardAmount);
+    toast({
+        title: "Check-in Successful!",
+        description: `Day ${checkInCount} check-in complete. You earned ${rewardAmount} RIBS!`,
+    });
+
+    setHasCheckedInToday(true);
+    setCheckInCount(prev => prev + 1);
+  };
+
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (tapsLeft <= 0) return;
 
@@ -122,6 +140,12 @@ export default function FarmPage() {
     <>
       <AppLayout>
         <div className="relative pt-8">
+           <div className="absolute top-0 left-0">
+            <Button variant="outline" onClick={handleCheckIn} disabled={hasCheckedInToday}>
+              <CalendarCheck className="mr-2 h-4 w-4" />
+              Check-in: {checkInCount}x
+            </Button>
+          </div>
           <div className="absolute top-0 right-0">
             <div
               className={cn(
@@ -132,7 +156,7 @@ export default function FarmPage() {
               {userTitle}
             </div>
           </div>
-          <div className="text-center space-y-8">
+          <div className="text-center space-y-8 pt-16">
             <div>
               <h1 className="font-headline text-5xl font-bold text-primary">
                 {balance.toLocaleString('en-US')}
