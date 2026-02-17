@@ -161,7 +161,7 @@ export default function SpinPage() {
       return (
         <div className="flex flex-col items-center gap-4">
           <Image
-            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidq53erg4thcwtbjly4itqslwxeqx3m5iiv7tkhj74uydmoqz5ytm"
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidqm2w7kvkcxgowstbptive5vjyuwnabl5rcammfkkasjioabrxle"
             alt="Mythic Card"
             width={120}
             height={168}
@@ -189,7 +189,7 @@ export default function SpinPage() {
       return (
         <div className="flex flex-col items-center gap-4">
           <Image
-            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeihnajxcobzjfxgzsryz7vhizr7ng4fpuscmvptbpjhaagv7tkadve"
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidw7yyryxsvkrnvt3iq265sgzlxqgdqyjof2f37boirniov3c7ene"
             alt="Epic Card"
             width={120}
             height={168}
@@ -281,11 +281,11 @@ export default function SpinPage() {
           </div>
 
           <div className="flex flex-col gap-4 w-full max-w-sm">
-            <Button size="lg" onClick={() => handleSpin(false)} disabled={isSpinning || freeSpins <= 0}>
+            <Button size="lg" onClick={() => handleSpin(false)} disabled={isSpinning || freeSpins <= 0} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
               <Ticket className="mr-2" />
               Use Free Spin ({freeSpins} left)
             </Button>
-            <Button size="lg" variant="secondary" onClick={() => handleSpin(true)} disabled={isSpinning || adSpins <= 0}>
+            <Button size="lg" onClick={() => handleSpin(true)} disabled={isSpinning || adSpins <= 0} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
                 <Tv className="mr-2" />
               Watch Ad for Spin ({adSpins} left)
             </Button>
@@ -372,5 +372,3 @@ export default function SpinPage() {
     </>
   );
 }
-
-    

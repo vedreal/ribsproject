@@ -51,7 +51,7 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground">Provide your email for important updates and airdrop eligibility.</p>
             <div className="flex items-center gap-2 pt-2">
                 <Input type="email" placeholder="your.email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <Button>Submit</Button>
+                <Button className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">Submit</Button>
             </div>
         </div>
 

@@ -83,7 +83,7 @@ export function UpgradeSheet({
                   </div>
                    <Progress value={(currentLevel / maxLevel) * 100} className="h-2" />
                 </div>
-                <Button className="w-full font-bold" onClick={() => handleUpgrade(upgrade.id)} disabled={currentLevel >= maxLevel}>
+                <Button className="w-full font-bold bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 hover:brightness-95" onClick={() => handleUpgrade(upgrade.id)} disabled={currentLevel >= maxLevel}>
                     {currentLevel >= maxLevel ? 'Max Level' : (
                         <>
                             Upgrade for <RibsIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? cost.toLocaleString() : cost.toLocaleString('en-US')}

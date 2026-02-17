@@ -28,7 +28,7 @@ export default function TasksPage() {
                         </div>
                     </div>
                 </div>
-                <Button asChild variant="secondary">
+                <Button asChild className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
                     <Link href={task.href} target="_blank">Go</Link>
                 </Button>
             </div>
