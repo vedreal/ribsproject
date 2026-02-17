@@ -227,7 +227,7 @@ export default function FarmPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-baseline">
                   <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
                     <p className="text-3xl font-bold">
@@ -236,7 +236,7 @@ export default function FarmPage() {
                   ) : (
                     <Button
                       onClick={handleClaim}
-                      className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+                      className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold px-4 py-1.5 h-auto text-sm"
                     >
                       Claim
                     </Button>
