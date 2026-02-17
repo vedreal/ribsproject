@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Gem, CalendarCheck, Disc } from 'lucide-react';
+import { Gem, CalendarCheck, Disc, ArrowUpCircle } from 'lucide-react';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
@@ -225,15 +225,10 @@ export default function FarmPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-3">
                 <div className="flex justify-between items-center">
-                  <div className="space-y-1">
-                    <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Faucet Rate : {farmingBenefit}
-                    </p>
-                  </div>
+                  <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
                     <p className="text-3xl font-bold">
                       {timeToClaim || '...'}
@@ -247,23 +242,17 @@ export default function FarmPage() {
                     </Button>
                   )}
                 </div>
-              </div>
-
-              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 flex flex-col items-center justify-center">
-                <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center w-full mb-4">Upgrades</h2>
-                <div className="space-y-4 flex flex-col items-center justify-center flex-grow w-full">
-                  <p className="text-muted-foreground text-center">
-                    Boost your farming rate and tap power.
-                  </p>
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() => setIsUpgradeSheetOpen(true)}
-                    size="lg"
-                  >
-                    <Gem className="mr-2 h-4 w-4" />
-                    Open Upgrades
-                  </Button>
+                <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Faucet Rate : {farmingBenefit}
+                    </p>
+                    <Button
+                        onClick={() => setIsUpgradeSheetOpen(true)}
+                        className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold px-4 py-1.5 h-auto text-sm"
+                    >
+                        <ArrowUpCircle className="mr-2 h-4 w-4" />
+                        Upgrade
+                    </Button>
                 </div>
               </div>
             </div>
