@@ -66,10 +66,11 @@ export default function SpinPage() {
 
     const baseRotation = wheelRotation - (wheelRotation % 360);
     
-    // The pointer is at the top (0deg). conic-gradient also starts at the top.
-    // We need to align the center of the winning segment with the top pointer.
+    // The pointer is at the top (0deg).
+    // We calculate the rotation needed to align the center of the winning segment with the pointer.
+    // There was a persistent 90-degree offset in the calculation which is now corrected.
     const targetRotation =
-      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2);
+      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) + 90;
 
     setWheelRotation(targetRotation);
 
