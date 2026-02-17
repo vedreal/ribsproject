@@ -1,5 +1,4 @@
 import { Send, Clapperboard } from 'lucide-react';
-import { DiscordIcon } from '@/components/ribs/discord-icon';
 import { XIcon } from '@/components/ribs/x-icon';
 import type { ElementType } from 'react';
 
@@ -31,13 +30,6 @@ export const tasks: Task[] = [
     title: 'Join Telegram Channel',
     reward: 200,
     Icon: Send,
-    href: '#',
-  },
-  {
-    id: 4,
-    title: 'Join Discord Group',
-    reward: 200,
-    Icon: DiscordIcon,
     href: '#',
   },
 ];
