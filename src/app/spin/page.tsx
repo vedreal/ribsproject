@@ -25,8 +25,8 @@ const rewards = [
   'NFT Rare',
   '500 RIBS',
   'NFT Mytic',
-  '300 RIBS',
-  'NFT Common',
+  '0.2 TON',
+  '1 TON',
 ];
 
 const segmentColors = [
@@ -69,15 +69,17 @@ export default function SpinPage() {
 
     const spins = 5;
     const fullSpinsRotation = 360 * spins;
+    
+    // The angle for the middle of the winning segment.
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     
-    // The required rotation to bring that middle angle to the top (270deg or -90deg position)
+    // The required rotation to bring that middle angle to the TOP (270deg).
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
-    
-    // Get the wheel's current position within a single 360-degree circle
-    const currentAngle = wheelRotation % 360;
 
-    // Calculate the total rotation to add for this spin, accounting for the current position
+    // Get the wheel's current position to ensure subsequent spins are correct.
+    const currentAngle = wheelRotation % 360;
+    
+    // Calculate the total rotation to add for this spin, accounting for the current position.
     const rotationToAdd = fullSpinsRotation + alignmentRotation - currentAngle;
 
     setWheelRotation(wheelRotation + rotationToAdd);
