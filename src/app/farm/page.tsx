@@ -142,12 +142,16 @@ export default function FarmPage() {
       <AppLayout>
         <div className="relative pt-8">
            <div className="absolute top-0 left-0 flex flex-col items-start gap-2">
-            <Button variant="outline" onClick={handleCheckIn} disabled={hasCheckedInToday}>
+            <Button
+              onClick={handleCheckIn}
+              disabled={hasCheckedInToday}
+              className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
+            >
               <CalendarCheck className="mr-2 h-4 w-4" />
               Check-in: {checkInCount}x
             </Button>
             <Link href="/spin" passHref>
-                <Button variant="outline">
+                <Button className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
                     <Disc className="mr-2 h-4 w-4" />
                     Free Spin
                 </Button>
