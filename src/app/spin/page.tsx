@@ -66,10 +66,10 @@ export default function SpinPage() {
 
     const baseRotation = wheelRotation - (wheelRotation % 360);
     
-    // The pointer is at the top (-90deg).
+    // The pointer is at the top.
     // We calculate the rotation needed to align the center of the winning segment with the pointer.
     const targetRotation =
-      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) - 90;
+      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) + 90;
 
     setWheelRotation(targetRotation);
 
