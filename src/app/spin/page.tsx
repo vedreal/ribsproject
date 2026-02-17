@@ -74,7 +74,8 @@ export default function SpinPage() {
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     
     // The required rotation to bring that middle angle to the TOP (270deg).
-    const alignmentRotation = 270 - targetSegmentMiddleAngle;
+    // A +90 degree correction is added to counteract a consistent systemic offset that makes it land 90 degrees to the left.
+    const alignmentRotation = 270 - targetSegmentMiddleAngle + 90;
 
     // Get the wheel's current position to ensure subsequent spins are correct.
     const currentAngle = wheelRotation % 360;
