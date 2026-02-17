@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { Tv, Ticket } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const rewards = [
@@ -131,10 +130,47 @@ export default function SpinPage() {
               style={{
                 transition: 'transform 5s cubic-bezier(0.1, 0, 0.2, 1)',
                 transform: `rotate(${wheelRotation}deg)`,
-                background: 'conic-gradient(from 9deg, #818cf8, #c084fc, #f9a8d4, #fde047, #a3e635, #4ade80, #34d399, #22d3ee, #38bdf8, #60a5fa)',
               }}
             >
-              <div className="absolute inset-4 rounded-full bg-card flex items-center justify-center">
+              {/* Conic background */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'conic-gradient(from 9deg, #818cf8, #c084fc, #f9a8d4, #fde047, #a3e635, #4ade80, #34d399, #22d3ee, #38bdf8, #60a5fa)',
+                }}
+              />
+              
+              {/* Lines separating segments */}
+              {rewards.map((_, i) => (
+                  <div
+                      key={i}
+                      className="absolute top-0 left-1/2 w-px h-1/2 origin-bottom bg-black/20"
+                      style={{ transform: `rotate(${(360 / rewards.length) * i}deg)` }}
+                  />
+              ))}
+
+              {/* Reward text */}
+              {rewards.map((reward, i) => {
+                  const angle = 360 / rewards.length;
+                  const textRotation = i * angle + angle / 2;
+                  return (
+                      <div
+                          key={i}
+                          className="absolute top-0 left-0 w-full h-full flex justify-center"
+                          style={{ transform: `rotate(${textRotation}deg)` }}
+                      >
+                          <span
+                              className="pt-4 text-xs font-bold text-background shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
+                              style={{ transform: 'rotate(-90deg)'}}
+                          >
+                              {reward}
+                          </span>
+                      </div>
+                  );
+              })}
+
+              {/* Center circle */}
+              <div className="absolute inset-12 rounded-full bg-card flex items-center justify-center">
                 <RibsIcon className="w-16 h-16" />
               </div>
             </div>
@@ -150,18 +186,6 @@ export default function SpinPage() {
               Watch Ad for Spin ({adSpins} left)
             </Button>
           </div>
-        </div>
-
-        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 text-left">
-            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight mb-4">Possible Rewards</h2>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-muted-foreground">
-                {rewards.map((r, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                        <RibsIcon className="w-4 h-4 text-primary/50" />
-                        <span>{r}</span>
-                    </li>
-                ))}
-            </ul>
         </div>
       </div>
     </AppLayout>
