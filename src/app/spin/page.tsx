@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +13,7 @@ import {
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
-import { Tv, Ticket, Gem } from 'lucide-react';
+import { Tv, Ticket } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const rewards = [
@@ -64,14 +65,13 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * totalRewards);
     const selectedReward = rewards[randomRewardIndex];
 
-    const baseRotation = wheelRotation - (wheelRotation % 360);
-    
-    // The pointer is at the top.
-    // We calculate the rotation needed to align the center of the winning segment with the pointer.
-    const targetRotation =
-      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) + 90;
+    const baseRotation = 360 * 5; // 5 full rotations
+    const targetAngle = randomRewardIndex * segmentAngle;
+    const centerOffset = segmentAngle / 2;
+    const finalRotation = baseRotation - targetAngle - centerOffset;
 
-    setWheelRotation(targetRotation);
+    setWheelRotation(wheelRotation + finalRotation);
+
 
     setTimeout(() => {
       setResult(selectedReward);
@@ -116,7 +116,12 @@ export default function SpinPage() {
     if (result.includes('TON')) {
         return (
             <div className="flex items-center gap-2 text-4xl font-bold text-cyan-400">
-                <Gem className="w-10 h-10" />
+                <Image
+                  src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafkreib6wlrvvorkcbkma43liqxrm4dv7hgad4jbqlcjzaa6rynileb7c4"
+                  alt="TON coin"
+                  width={40}
+                  height={40}
+                />
                 <span>{result}</span>
             </div>
         );

@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'gold-defensive-cattle-30.mypinata.cloud',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
