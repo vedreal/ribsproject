@@ -69,17 +69,16 @@ export default function SpinPage() {
 
     const spins = 5;
     const fullSpinsRotation = 360 * spins;
-    
-    const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
+    const targetSegmentEndAngle = (randomRewardIndex + 1) * segmentAngle;
+    const targetSegmentMiddleAngle = targetSegmentEndAngle - (segmentAngle / 2);
     
     // Align the target segment with the top pointer (270deg in conic-gradient coordinates)
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
 
     const currentAngle = wheelRotation % 360;
+    const newRotation = wheelRotation + fullSpinsRotation + alignmentRotation - currentAngle;
     
-    const rotationToAdd = fullSpinsRotation + alignmentRotation - currentAngle;
-
-    setWheelRotation(wheelRotation + rotationToAdd);
+    setWheelRotation(newRotation);
 
     setTimeout(() => {
       setResult(selectedReward);
@@ -127,6 +126,20 @@ export default function SpinPage() {
           <Image
             src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidq53erg4thcwtbjly4itqslwxeqx3m5iiv7tkhj74uydmoqz5ytm"
             alt="Mythic Card"
+            width={120}
+            height={168}
+            className="rounded-lg shadow-lg"
+          />
+          <div className="text-4xl font-bold text-yellow-400">{result}</div>
+        </div>
+      );
+    }
+    if (result === 'Rare Card') {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <Image
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeihnajxcobzjfxgzsryz7vhizr7ng4fpuscmvptbpjhaagv7tkadve"
+            alt="Rare Card"
             width={120}
             height={168}
             className="rounded-lg shadow-lg"
