@@ -66,10 +66,10 @@ export default function SpinPage() {
 
     const baseRotation = wheelRotation - (wheelRotation % 360);
     
-    // The pointer is at the top (0deg).
+    // The pointer is at the top (0deg which is 90deg offset from right).
     // We calculate the rotation needed to align the center of the winning segment with the pointer.
     const targetRotation =
-      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) + 90;
+      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2);
 
     setWheelRotation(targetRotation);
 
@@ -176,7 +176,7 @@ export default function SpinPage() {
                           style={{ transform: `rotate(${textRotation}deg)` }}
                       >
                           <span
-                              className="pt-4 text-xs font-bold text-black shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
+                              className="font-sans pt-4 text-xs font-bold text-black shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
                               style={{ transform: 'rotate(-90deg)'}}
                           >
                               {reward}
