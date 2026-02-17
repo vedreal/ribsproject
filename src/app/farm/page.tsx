@@ -234,7 +234,10 @@ export default function FarmPage() {
                       {timeToClaim || '...'}
                     </p>
                   ) : (
-                    <Button onClick={handleClaim} size="lg">
+                    <Button
+                      onClick={handleClaim}
+                      className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+                    >
                       Claim
                     </Button>
                   )}
