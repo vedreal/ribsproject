@@ -66,24 +66,22 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
+    // Core Logic - Do Not Touch
     const spins = 5;
-    const fullSpinsRotation = 360 * spins;
+    const baseRotation = spins * 360;
     
-    // The pointer is at the top (which corresponds to 270 degrees in the conic-gradient coordinate system where 0 is right)
-    const pointerAngle = 270;
-
-    // Calculate the target angle for the middle of the reward segment
     const targetSegmentEndAngle = (randomRewardIndex + 1) * segmentAngle;
     const targetSegmentMiddleAngle = targetSegmentEndAngle - (segmentAngle / 2);
     
-    // Calculate the rotation needed to align the target segment with the pointer
-    const alignmentRotation = pointerAngle - targetSegmentMiddleAngle;
-
+    // The pointer is at the top (0 degrees for transform:rotate).
+    // The conic gradient starts at 3 o'clock (0 degrees). We need to align the middle of the segment with the top.
+    // The angle for the top in a standard coordinate system is 270 degrees or -90 degrees.
+    const alignmentRotation = 270 - targetSegmentMiddleAngle;
+    
     // Get the current rotation angle (modulo 360) to handle subsequent spins correctly
     const currentAngle = wheelRotation % 360;
 
-    // Calculate the new total rotation. This ensures consistent stopping position.
-    const newRotation = (wheelRotation - currentAngle) + fullSpinsRotation + alignmentRotation;
+    const newRotation = (wheelRotation - currentAngle) + baseRotation + alignmentRotation;
 
     setWheelRotation(newRotation);
 
@@ -145,7 +143,7 @@ export default function SpinPage() {
       return (
         <div className="flex flex-col items-center gap-4">
           <Image
-            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeihnajxcobzjfxgzsryz7vhizr7ng4fpuscmvptbpjhaagv7tkadve"
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeigzzuj4h2dubddoshcjm2jzbtdbvdeoyghtawnkun4mzwjz22e3sm"
             alt="Rare Card"
             width={120}
             height={168}
