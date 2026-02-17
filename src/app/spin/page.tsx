@@ -70,12 +70,15 @@ export default function SpinPage() {
     const spins = 5;
     const fullSpinsRotation = 360 * spins;
     
-    // The angle for the middle of the winning segment.
+    // The angle for the middle of the winning segment in the conic-gradient coordinate system (0 deg is right).
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     
-    // The required rotation to bring that middle angle to the TOP (270deg).
-    // A +90 degree correction is added to counteract a consistent systemic offset that makes it land 90 degrees to the left.
-    const alignmentRotation = 270 - targetSegmentMiddleAngle + 90;
+    // The required rotation to bring that middle angle to the TOP.
+    // The pointer is at the top (12 o'clock). In the conic-gradient system, this is 90 degrees.
+    // In the CSS transform:rotate() system, top is 0 degrees.
+    // To align the target angle with the pointer, the final rotation (R) must satisfy:
+    // targetAngle_rot + R = pointer_rot => (targetAngle_conic - 90) + R = 0 => R = 90 - targetAngle_conic
+    const alignmentRotation = 90 - targetSegmentMiddleAngle;
 
     // Get the wheel's current position to ensure subsequent spins are correct.
     const currentAngle = wheelRotation % 360;
