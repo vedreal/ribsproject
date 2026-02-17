@@ -28,6 +28,21 @@ const rewards = [
   '100 RIBS',
 ];
 
+const segmentColors = [
+    '#818cf8', '#c084fc', '#f9a8d4', '#fde047', '#a3e635', 
+    '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa'
+];
+
+const numRewards = rewards.length;
+const segmentAngle = 360 / numRewards;
+const conicGradient = `conic-gradient(${segmentColors
+    .map((color, i) => {
+        const startAngle = i * segmentAngle;
+        const endAngle = (i + 1) * segmentAngle;
+        return `${color} ${startAngle}deg ${endAngle}deg`;
+    })
+    .join(', ')})`;
+
 export default function SpinPage() {
   const [freeSpins, setFreeSpins] = useState(1);
   const [adSpins, setAdSpins] = useState(2);
@@ -49,7 +64,6 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * totalRewards);
     const selectedReward = rewards[randomRewardIndex];
 
-    const segmentAngle = 360 / totalRewards;
     const baseRotation = wheelRotation - (wheelRotation % 360);
     const targetRotation =
       baseRotation + 360 * 5 - randomRewardIndex * segmentAngle - (segmentAngle / 2);
@@ -136,19 +150,10 @@ export default function SpinPage() {
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
-                  background: 'conic-gradient(from 9deg, #818cf8, #c084fc, #f9a8d4, #fde047, #a3e635, #4ade80, #34d399, #22d3ee, #38bdf8, #60a5fa)',
+                  background: conicGradient,
                 }}
               />
               
-              {/* Lines separating segments */}
-              {rewards.map((_, i) => (
-                  <div
-                      key={i}
-                      className="absolute top-0 left-1/2 w-px h-1/2 origin-bottom bg-black/20"
-                      style={{ transform: `rotate(${(360 / rewards.length) * i}deg)` }}
-                  />
-              ))}
-
               {/* Reward text */}
               {rewards.map((reward, i) => {
                   const angle = 360 / rewards.length;
@@ -160,7 +165,7 @@ export default function SpinPage() {
                           style={{ transform: `rotate(${textRotation}deg)` }}
                       >
                           <span
-                              className="pt-4 text-xs font-bold text-background shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
+                              className="pt-4 text-xs font-bold text-black shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
                               style={{ transform: 'rotate(-90deg)'}}
                           >
                               {reward}
