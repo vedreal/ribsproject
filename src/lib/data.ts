@@ -1,33 +1,42 @@
-import { Twitter, Send, Globe, type LucideIcon } from 'lucide-react';
+import { Twitter, Send, Clapperboard } from 'lucide-react';
+import { DiscordIcon } from '@/components/ribs/discord-icon';
+import type { ElementType } from 'react';
 
 export type Task = {
   id: number;
   title: string;
   reward: number;
-  Icon: LucideIcon;
+  Icon: ElementType;
   href: string;
 };
 
 export const tasks: Task[] = [
   {
     id: 1,
-    title: 'Join Telegram Channel',
-    reward: 5000,
-    Icon: Send,
+    title: 'Watch Ads (3/3)',
+    reward: 300,
+    Icon: Clapperboard,
     href: '#',
   },
   {
     id: 2,
     title: 'Follow us on X',
-    reward: 5000,
+    reward: 200,
     Icon: Twitter,
     href: '#',
   },
   {
     id: 3,
-    title: 'Visit our Website',
-    reward: 2000,
-    Icon: Globe,
+    title: 'Join Telegram Channel',
+    reward: 200,
+    Icon: Send,
+    href: '#',
+  },
+  {
+    id: 4,
+    title: 'Join Discord Group',
+    reward: 200,
+    Icon: DiscordIcon,
     href: '#',
   },
 ];
