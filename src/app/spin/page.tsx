@@ -63,21 +63,28 @@ export default function SpinPage() {
       setFreeSpins((prev) => prev - 1);
     }
 
-    const totalRewards = rewards.length;
-    const randomRewardIndex = Math.floor(Math.random() * totalRewards);
+    const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
-
+    
     const spins = 5;
     const fullSpinsRotation = 360 * spins;
+    
+    // The pointer is at the top (which corresponds to 270 degrees in the conic-gradient coordinate system where 0 is right)
+    const pointerAngle = 270;
+
+    // Calculate the target angle for the middle of the reward segment
     const targetSegmentEndAngle = (randomRewardIndex + 1) * segmentAngle;
     const targetSegmentMiddleAngle = targetSegmentEndAngle - (segmentAngle / 2);
     
-    // Align the target segment with the top pointer (270deg in conic-gradient coordinates)
-    const alignmentRotation = 270 - targetSegmentMiddleAngle;
+    // Calculate the rotation needed to align the target segment with the pointer
+    const alignmentRotation = pointerAngle - targetSegmentMiddleAngle;
 
+    // Get the current rotation angle (modulo 360) to handle subsequent spins correctly
     const currentAngle = wheelRotation % 360;
-    const newRotation = wheelRotation + fullSpinsRotation + alignmentRotation - currentAngle;
-    
+
+    // Calculate the new total rotation. This ensures consistent stopping position.
+    const newRotation = (wheelRotation - currentAngle) + fullSpinsRotation + alignmentRotation;
+
     setWheelRotation(newRotation);
 
     setTimeout(() => {
@@ -148,6 +155,20 @@ export default function SpinPage() {
         </div>
       );
     }
+    if (result === 'Epic Card') {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <Image
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeihnajxcobzjfxgzsryz7vhizr7ng4fpuscmvptbpjhaagv7tkadve"
+            alt="Epic Card"
+            width={120}
+            height={168}
+            className="rounded-lg shadow-lg"
+          />
+          <div className="text-4xl font-bold text-yellow-400">{result}</div>
+        </div>
+      );
+    }
     if (result.includes('TON')) {
         return (
             <div className="flex items-center gap-2 text-4xl font-bold text-cyan-400">
@@ -160,9 +181,6 @@ export default function SpinPage() {
                 <span>{result}</span>
             </div>
         );
-    }
-    if (result.includes('Card')) {
-        return <div className="text-4xl font-bold text-yellow-400">{result}</div>;
     }
     if (result === 'Try Again!') {
         return <div className="text-4xl font-bold text-muted-foreground">{result}</div>;
