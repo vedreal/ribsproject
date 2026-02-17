@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Gem, CalendarCheck } from 'lucide-react';
+import { Gem, CalendarCheck, Ticket } from 'lucide-react';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
@@ -140,11 +141,17 @@ export default function FarmPage() {
     <>
       <AppLayout>
         <div className="relative pt-8">
-           <div className="absolute top-0 left-0">
+           <div className="absolute top-0 left-0 flex items-center gap-2">
             <Button variant="outline" onClick={handleCheckIn} disabled={hasCheckedInToday}>
               <CalendarCheck className="mr-2 h-4 w-4" />
               Check-in: {checkInCount}x
             </Button>
+            <Link href="/spin" passHref>
+                <Button variant="outline">
+                    <Ticket className="mr-2 h-4 w-4" />
+                    Free Spin
+                </Button>
+            </Link>
           </div>
           <div className="absolute top-0 right-0">
             <div
@@ -215,7 +222,7 @@ export default function FarmPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="inset-card p-6 space-y-4">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-4">
                 <div className="flex justify-between items-center">
                   <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
@@ -233,7 +240,7 @@ export default function FarmPage() {
                 </p>
               </div>
 
-              <div className="inset-card p-6 flex flex-col items-center justify-center">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 flex flex-col items-center justify-center">
                 <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center w-full mb-4">Upgrades</h2>
                 <div className="space-y-4 flex flex-col items-center justify-center flex-grow w-full">
                   <p className="text-muted-foreground text-center">
