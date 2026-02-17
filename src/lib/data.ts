@@ -1,5 +1,6 @@
-import { Twitter, Send, Clapperboard } from 'lucide-react';
+import { Send, Clapperboard } from 'lucide-react';
 import { DiscordIcon } from '@/components/ribs/discord-icon';
+import { XIcon } from '@/components/ribs/x-icon';
 import type { ElementType } from 'react';
 
 export type Task = {
@@ -22,7 +23,7 @@ export const tasks: Task[] = [
     id: 2,
     title: 'Follow us on X',
     reward: 200,
-    Icon: Twitter,
+    Icon: XIcon,
     href: '#',
   },
   {
