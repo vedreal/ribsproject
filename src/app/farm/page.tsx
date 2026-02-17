@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -141,23 +142,23 @@ export default function FarmPage() {
     <>
       <AppLayout>
         <div className="relative">
-           <div className="absolute top-4 left-0 flex flex-col items-start gap-2">
-            <Button
-              onClick={handleCheckIn}
-              disabled={hasCheckedInToday}
-              className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto"
-            >
-              <CalendarCheck className="mr-2 h-4 w-4" />
-              Check-in: {checkInCount}x
-            </Button>
-            <Link href="/spin" passHref>
-                <Button className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto">
-                    <Disc className="mr-2 h-4 w-4" />
-                    Free Spin
-                </Button>
-            </Link>
-          </div>
-          <div className="absolute top-4 right-0">
+          <div className="flex justify-between items-start mb-8">
+            <div className="flex flex-col items-start gap-2">
+              <Button
+                onClick={handleCheckIn}
+                disabled={hasCheckedInToday}
+                className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto"
+              >
+                <CalendarCheck className="mr-2 h-4 w-4" />
+                Check-in: {checkInCount}x
+              </Button>
+              <Link href="/spin" passHref>
+                  <Button className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto">
+                      <Disc className="mr-2 h-4 w-4" />
+                      Free Spin
+                  </Button>
+              </Link>
+            </div>
             <div
               className={cn(
                 'text-xs font-bold px-3 py-1.5 rounded-full shadow-md',
@@ -167,7 +168,7 @@ export default function FarmPage() {
               {userTitle}
             </div>
           </div>
-          <div className="text-center space-y-8 pt-16">
+          <div className="text-center space-y-8">
             <div>
               <h1 className="font-headline text-5xl font-bold text-primary">
                 {balance.toLocaleString('en-US')}
@@ -236,7 +237,7 @@ export default function FarmPage() {
                   </div>
                   <div className='flex flex-col items-end gap-2'>
                     {timeToClaim !== 'Ready to Claim' ? (
-                      <p className="text-3xl font-bold">
+                      <p className="text-3xl">
                         {timeToClaim || '...'}
                       </p>
                     ) : (
@@ -268,3 +269,4 @@ export default function FarmPage() {
     </>
   );
 }
+    
