@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
-import { Tv, Ticket } from 'lucide-react';
+import { Tv, Ticket, Gem } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const rewards = [
@@ -23,9 +23,9 @@ const rewards = [
   '1000 RIBS',
   'NFT Rare',
   '500 RIBS',
-  'NFT Common',
+  '1 TON',
   '300 RIBS',
-  '100 RIBS',
+  '0.2 TON',
 ];
 
 const segmentColors = [
@@ -68,7 +68,6 @@ export default function SpinPage() {
     
     // The pointer is at the top (0deg).
     // We calculate the rotation needed to align the center of the winning segment with the pointer.
-    // There was a persistent 90-degree offset in the calculation which is now corrected.
     const targetRotation =
       baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2) + 90;
 
@@ -114,10 +113,18 @@ export default function SpinPage() {
   const getRewardComponent = () => {
     if (!result) return null;
 
-    if (typeof result === 'string' && result.startsWith('NFT')) {
+    if (result.includes('TON')) {
+        return (
+            <div className="flex items-center gap-2 text-4xl font-bold text-cyan-400">
+                <Gem className="w-10 h-10" />
+                <span>{result}</span>
+            </div>
+        );
+    }
+    if (result.startsWith('NFT')) {
         return <div className="text-4xl font-bold text-yellow-400">{result}</div>;
     }
-    if (typeof result === 'string' && result === 'Try Again!') {
+    if (result === 'Try Again!') {
         return <div className="text-4xl font-bold text-muted-foreground">{result}</div>;
     }
     const amount = result.split(' ')[0];
