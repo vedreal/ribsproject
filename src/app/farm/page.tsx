@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Gem, CalendarCheck, Ticket } from 'lucide-react';
+import { Gem, CalendarCheck, Disc } from 'lucide-react';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
@@ -148,7 +148,7 @@ export default function FarmPage() {
             </Button>
             <Link href="/spin" passHref>
                 <Button variant="outline">
-                    <Ticket className="mr-2 h-4 w-4" />
+                    <Disc className="mr-2 h-4 w-4" />
                     Free Spin
                 </Button>
             </Link>
