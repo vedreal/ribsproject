@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Playfair Display', 'serif'],
-        headline: ['Playfair Display', 'serif'],
+        body: ['Marmelad', 'sans-serif'],
+        headline: ['Marmelad', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
