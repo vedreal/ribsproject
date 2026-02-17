@@ -19,12 +19,12 @@ import { useToast } from '@/hooks/use-toast';
 const rewards = [
   '1 TON',
   '5000 RIBS',
-  'NFT Legendary',
+  'Epic Card',
   'Try Again!',
   '0.2 TON',
-  'NFT Rare',
+  'Rare Card',
   '500 RIBS',
-  'NFT Mytic',
+  'Mythic Card',
   '0.2 TON',
   '1 TON',
 ];
@@ -74,11 +74,10 @@ export default function SpinPage() {
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     
     // The required rotation to bring that middle angle to the TOP.
-    // The pointer is at the top (12 o'clock). In the conic-gradient system, this is 90 degrees.
-    // In the CSS transform:rotate() system, top is 0 degrees.
-    // To align the target angle with the pointer, the final rotation (R) must satisfy:
-    // targetAngle_rot + R = pointer_rot => (targetAngle_conic - 90) + R = 0 => R = 90 - targetAngle_conic
-    const alignmentRotation = 90 - targetSegmentMiddleAngle;
+    // The pointer is at the top (12 o'clock). In CSS transform:rotate(), top is 0 degrees.
+    // In conic-gradient, top is 270 degrees.
+    // To align the target angle with the pointer at the top, we want the target's final angle to be 270.
+    const alignmentRotation = 270 - targetSegmentMiddleAngle;
 
     // Get the wheel's current position to ensure subsequent spins are correct.
     const currentAngle = wheelRotation % 360;
@@ -141,7 +140,7 @@ export default function SpinPage() {
             </div>
         );
     }
-    if (result.startsWith('NFT')) {
+    if (result.includes('Card')) {
         return <div className="text-4xl font-bold text-yellow-400">{result}</div>;
     }
     if (result === 'Try Again!') {
