@@ -1,4 +1,4 @@
-import { Send, Clapperboard } from 'lucide-react';
+import { Send, Clapperboard, Users } from 'lucide-react';
 import { XIcon } from '@/components/ribs/x-icon';
 import type { ElementType } from 'react';
 
@@ -20,15 +20,22 @@ export const tasks: Task[] = [
   },
   {
     id: 2,
+    title: 'Invite 5 Friends',
+    reward: 600,
+    Icon: Users,
+    href: '/referrals',
+  },
+  {
+    id: 3,
     title: 'Follow us on X',
-    reward: 200,
+    reward: 300,
     Icon: XIcon,
     href: '#',
   },
   {
-    id: 3,
+    id: 4,
     title: 'Join Telegram Channel',
-    reward: 200,
+    reward: 300,
     Icon: Send,
     href: '#',
   },
