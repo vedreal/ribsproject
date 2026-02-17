@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['"Edu NSW ACT Foundation"', 'sans-serif'],
-        headline: ['"Edu NSW ACT Foundation"', 'sans-serif'],
+        body: ['"Patrick Hand"', 'sans-serif'],
+        headline: ['"Patrick Hand"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
