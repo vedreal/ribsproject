@@ -53,6 +53,12 @@ export default function SpinPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
+  const [tonBalance, setTonBalance] = useState(0.0);
+  const [rareCards, setRareCards] = useState(0);
+  const [epicCards, setEpicCards] = useState(0);
+  const [mythicCards, setMythicCards] = useState(0);
+
+
   const spinTheWheel = (isAdSpin: boolean) => {
     if (isSpinning) return;
     setIsSpinning(true);
@@ -66,22 +72,20 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
-    // Core Logic - Do Not Touch
+    // Consistent Wheel Logic - DO NOT TOUCH
     const spins = 5;
     const baseRotation = spins * 360;
     
-    const targetSegmentEndAngle = (randomRewardIndex + 1) * segmentAngle;
-    const targetSegmentMiddleAngle = targetSegmentEndAngle - (segmentAngle / 2);
-    
-    // The pointer is at the top (0 degrees for transform:rotate).
-    // The conic gradient starts at 3 o'clock (0 degrees). We need to align the middle of the segment with the top.
-    // The angle for the top in a standard coordinate system is 270 degrees or -90 degrees.
+    // Align the middle of the winning segment with the top pointer (270 degrees in math coords)
+    const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
     
-    // Get the current rotation angle (modulo 360) to handle subsequent spins correctly
-    const currentAngle = wheelRotation % 360;
+    // Get the current visual rotation to ensure subsequent spins are correct
+    const currentVisualRotation = wheelRotation % 360;
 
-    const newRotation = (wheelRotation - currentAngle) + baseRotation + alignmentRotation;
+    // The new rotation is the total base spins + the alignment for the prize,
+    // adjusted by the current visual rotation to ensure continuity.
+    const newRotation = (wheelRotation - currentVisualRotation) + baseRotation + alignmentRotation;
 
     setWheelRotation(newRotation);
 
@@ -117,6 +121,34 @@ export default function SpinPage() {
   };
 
   const closeModal = () => {
+    if (result) {
+        if (result.includes('TON')) {
+            const amount = parseFloat(result.split(' ')[0]);
+            setTonBalance(prev => prev + amount);
+            toast({
+                title: 'Reward Added!',
+                description: `Your balance has increased by ${amount} TON.`
+            });
+        } else if (result === 'Rare Card') {
+            setRareCards(prev => prev + 1);
+            toast({
+                title: 'Card Acquired!',
+                description: 'A new Rare Card has been added to your collection.'
+            });
+        } else if (result === 'Epic Card') {
+            setEpicCards(prev => prev + 1);
+             toast({
+                title: 'Card Acquired!',
+                description: 'A new Epic Card has been added to your collection.'
+            });
+        } else if (result === 'Mythic Card') {
+            setMythicCards(prev => prev + 1);
+             toast({
+                title: 'Card Acquired!',
+                description: 'A new Mythic Card has been added to your collection.'
+            });
+        }
+    }
     setIsModalOpen(false);
     setResult(null);
     setIsSpinning(false);
@@ -257,6 +289,37 @@ export default function SpinPage() {
                 <Tv className="mr-2" />
               Watch Ad for Spin ({adSpins} left)
             </Button>
+          </div>
+          <div className="w-full max-w-sm">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-4 text-left">
+                  <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight text-center mb-2">My Rewards</h2>
+                  <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                              <Image
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafkreib6wlrvvorkcbkma43liqxrm4dv7hgad4jbqlcjzaa6rynileb7c4"
+                                alt="TON coin"
+                                width={24}
+                                height={24}
+                              />
+                              <span className="font-medium text-muted-foreground">TON Balance</span>
+                          </div>
+                          <span className="font-bold text-lg">{tonBalance.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                          <span className="font-medium text-muted-foreground">Rare Cards</span>
+                          <span className="font-bold text-lg">{rareCards}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                          <span className="font-medium text-muted-foreground">Epic Cards</span>
+                          <span className="font-bold text-lg">{epicCards}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                          <span className="font-medium text-muted-foreground">Mythic Cards</span>
+                          <span className="font-bold text-lg">{mythicCards}</span>
+                      </div>
+                  </div>
+              </div>
           </div>
         </div>
       </div>
