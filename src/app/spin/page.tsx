@@ -17,16 +17,16 @@ import { Tv, Ticket } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const rewards = [
-  'NFT Mytic',
+  '1 TON',
   '5000 RIBS',
   'NFT Legendary',
   'Try Again!',
-  '1000 RIBS',
+  '0.2 TON',
   'NFT Rare',
   '500 RIBS',
-  '1 TON',
+  'NFT Mytic',
   '300 RIBS',
-  '0.2 TON',
+  'NFT Common',
 ];
 
 const segmentColors = [
@@ -69,7 +69,7 @@ export default function SpinPage() {
     const targetAngle = randomRewardIndex * segmentAngle;
     const centerOffset = segmentAngle / 2;
     // This calculation ensures the middle of the segment aligns with the top pointer.
-    const finalRotation = baseRotation - targetAngle - centerOffset;
+    const finalRotation = baseRotation - targetAngle - centerOffset - 90;
 
     setWheelRotation(wheelRotation + finalRotation);
 
