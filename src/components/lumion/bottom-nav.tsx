@@ -61,7 +61,7 @@ export function BottomNav() {
               </div>
               <span
                 className={cn(
-                  'text-[10px] font-semibold transition-colors duration-200',
+                  'text-xs font-semibold transition-colors duration-200',
                   isActive
                     ? 'text-accent'
                     : 'text-muted-foreground group-hover:text-foreground'
