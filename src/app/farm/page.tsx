@@ -226,7 +226,7 @@ export default function FarmPage() {
                 <div className="flex justify-between items-center">
                   <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
-                    <p className="text-3xl font-bold font-mono">
+                    <p className="text-3xl font-bold">
                       {timeToClaim || '...'}
                     </p>
                   ) : (
