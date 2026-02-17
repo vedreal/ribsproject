@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Marmelad', 'sans-serif'],
-        headline: ['Marmelad', 'sans-serif'],
+        body: ['"Edu NSW ACT Foundation"', 'sans-serif'],
+        headline: ['"Edu NSW ACT Foundation"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

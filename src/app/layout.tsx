@@ -22,7 +22,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Marmelad&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation&display=swap"
           rel="stylesheet"
         />
       </head>
