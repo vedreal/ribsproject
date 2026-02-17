@@ -72,21 +72,19 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
-    // The wheel spins for 5 full rotations, plus the amount to get to the target reward.
     const spins = 5;
     const baseRotation = spins * 360;
 
-    // Calculate the angle for the middle of the target segment.
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
-
-    // The 'top' of the wheel in CSS rotation is 270 degrees. We need to align the middle of our target segment with that point.
-    // This calculation aligns the center of the selected segment to the top pointer.
-    const alignmentRotation = 270 - targetSegmentMiddleAngle;
     
-    // We get the current rotation of the wheel and add the new calculated rotation.
-    const newRotation = wheelRotation + baseRotation + alignmentRotation;
+    // This is the correct calculation.
+    // CSS rotation starts from 0 at the top, but conic-gradient starts at 0 on the right.
+    // There's a 90-degree offset.
+    const alignmentRotation = -targetSegmentMiddleAngle + 90;
+    
+    const newRotation = baseRotation + alignmentRotation;
 
-    setWheelRotation(newRotation);
+    setWheelRotation(prev => prev + newRotation);
 
     setTimeout(() => {
       setResult(selectedReward);
@@ -320,7 +318,7 @@ export default function SpinPage() {
                       <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                               <Image
-                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeia455e4qmfari4bsif24to44lgjtzwuwyut63aszg2h5e7s4ri2qy"
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidw7yyryxsvkrnvt3iq265sgzlxqgdqyjof2f37boirniov3c7ene"
                                 alt="Card icon"
                                 width={24}
                                 height={24}
