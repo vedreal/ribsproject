@@ -72,19 +72,16 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
-    // Consistent Wheel Logic - DO NOT TOUCH
     const spins = 5;
     const baseRotation = spins * 360;
     
-    // Align the middle of the winning segment with the top pointer (270 degrees in math coords)
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // Correct alignment to make the middle of the segment stop at the top (270deg in math coords)
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
     
-    // Get the current visual rotation to ensure subsequent spins are correct
     const currentVisualRotation = wheelRotation % 360;
-
-    // The new rotation is the total base spins + the alignment for the prize,
-    // adjusted by the current visual rotation to ensure continuity.
+    
     const newRotation = (wheelRotation - currentVisualRotation) + baseRotation + alignmentRotation;
 
     setWheelRotation(newRotation);
@@ -320,6 +317,10 @@ export default function SpinPage() {
                       </div>
                   </div>
               </div>
+          </div>
+          <div className="w-full max-w-sm text-center text-xs text-muted-foreground px-4">
+            <p>TON withdrawals will be enabled upon the conclusion of the airdrop</p>
+            <p>Accumulated cards can be redeemed for tokens and NFTs at the appropriate time</p>
           </div>
         </div>
       </div>
