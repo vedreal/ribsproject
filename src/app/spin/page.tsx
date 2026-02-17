@@ -68,6 +68,7 @@ export default function SpinPage() {
     const baseRotation = 360 * 5; // 5 full rotations
     const targetAngle = randomRewardIndex * segmentAngle;
     const centerOffset = segmentAngle / 2;
+    // This calculation ensures the middle of the segment aligns with the top pointer.
     const finalRotation = baseRotation - targetAngle - centerOffset;
 
     setWheelRotation(wheelRotation + finalRotation);
