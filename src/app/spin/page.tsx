@@ -66,10 +66,10 @@ export default function SpinPage() {
 
     const baseRotation = wheelRotation - (wheelRotation % 360);
     
-    // conic-gradient starts at 12 o'clock (0deg). The pointer is at 3 o'clock (90deg).
-    // We need to align the center of the winning segment with the 90deg pointer.
+    // The pointer is at the top (0deg). conic-gradient also starts at the top.
+    // We need to align the center of the winning segment with the top pointer.
     const targetRotation =
-      baseRotation + 360 * 5 + 90 - (randomRewardIndex * segmentAngle + segmentAngle / 2);
+      baseRotation + 360 * 5 - (randomRewardIndex * segmentAngle + segmentAngle / 2);
 
     setWheelRotation(targetRotation);
 
@@ -139,8 +139,8 @@ export default function SpinPage() {
 
         <div className="flex flex-col items-center gap-8">
           <div className="relative w-80 h-80 flex items-center justify-center">
-            <div className="absolute top-1/2 -right-4 -translate-y-1/2 z-10">
-                <div className="w-0 h-0 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent border-l-[25px] border-l-primary drop-shadow-lg"></div>
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+                <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-primary drop-shadow-lg"></div>
             </div>
             <div
               className="w-full h-full rounded-full border-8 border-primary/20 shadow-inner relative"
