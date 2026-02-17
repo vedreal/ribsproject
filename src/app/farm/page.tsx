@@ -21,12 +21,11 @@ const DAILY_TAPS = 1000;
 
 export default function FarmPage() {
   const [balance, setBalance] = useState(9800000);
-  const [tapsLeft, setTapsLeft] = useState(DAILY_TAPS);
+  const [tapsLeft, setTapsLeft] = useState(850);
   const [claimTime, setClaimTime] = useState<number | null>(null);
   const [timeToClaim, setTimeToClaim] = useState('');
   const [isUpgradeSheetOpen, setIsUpgradeSheetOpen] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
 
   const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
   const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1] : '...';
@@ -63,8 +62,6 @@ export default function FarmPage() {
   useEffect(() => {
     // Initialize client-side state
     setClaimTime(Date.now() + CLAIM_DURATION_MS);
-    setTapsLeft(850); // Example
-    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -138,9 +135,7 @@ export default function FarmPage() {
           <div className="text-center space-y-8">
             <div>
               <h1 className="font-headline text-5xl font-bold text-primary">
-                {isMounted
-                  ? balance.toLocaleString('en-US')
-                  : balance.toLocaleString('en-US')}
+                {balance.toLocaleString('en-US')}
               </h1>
               <p className="text-muted-foreground flex items-center justify-center gap-2">
                 <RibsIcon className="w-5 h-5" /> Your RIBS Balance
@@ -171,7 +166,7 @@ export default function FarmPage() {
                 className="w-full max-w-xs text-center space-y-1"
                 style={{ minHeight: '44px' }}
               >
-                {isMounted && tapsLeft <= 0 ? (
+                {tapsLeft <= 0 ? (
                   <div className="flex flex-col justify-center h-full pt-1">
                     <p className="font-bold text-primary">
                       Daily tap limit reached
@@ -183,13 +178,11 @@ export default function FarmPage() {
                 ) : (
                   <>
                     <p className="text-lg font-bold">
-                      {isMounted
-                        ? tapsLeft.toLocaleString('en-US')
-                        : '...'}{' '}
+                      {tapsLeft.toLocaleString('en-US')}
                       / {DAILY_TAPS.toLocaleString('en-US')}
                     </p>
                     <Progress
-                      value={isMounted ? (tapsLeft / DAILY_TAPS) * 100 : 0}
+                      value={(tapsLeft / DAILY_TAPS) * 100}
                       className="h-3"
                     />
                   </>
@@ -203,7 +196,7 @@ export default function FarmPage() {
                   <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
                     <p className="text-3xl font-bold font-mono">
-                      {timeToClaim || 'Loading...'}
+                      {timeToClaim || '...'}
                     </p>
                   ) : (
                     <Button onClick={handleClaim} size="lg">

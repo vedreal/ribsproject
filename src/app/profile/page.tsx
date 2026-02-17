@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,11 +20,6 @@ function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title
 
 export default function ProfilePage() {
     const [email, setEmail] = useState(userProfile.email || '');
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
   return (
     <AppLayout>
@@ -45,7 +40,7 @@ export default function ProfilePage() {
         </header>
 
         <div className="grid grid-cols-2 gap-4">
-            <StatCard icon={RibsIcon} title="Total RIBS" value={isMounted ? userProfile.totalRibs.toLocaleString() : userProfile.totalRibs.toLocaleString('en-US')} />
+            <StatCard icon={RibsIcon} title="Total RIBS" value={userProfile.totalRibs.toLocaleString('en-US')} />
             <StatCard icon={Users} title="Total Referrals" value={userProfile.totalReferrals} />
             <StatCard icon={Calendar} title="Join Date" value={userProfile.joinDate} />
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />
