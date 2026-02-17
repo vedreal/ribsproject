@@ -226,8 +226,8 @@ export default function FarmPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-4">
-                <div className="flex justify-between items-baseline">
+              <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-2">
+                <div className="flex justify-between items-center">
                   <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                   {timeToClaim !== 'Ready to Claim' ? (
                     <p className="text-3xl font-bold">
