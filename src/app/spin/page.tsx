@@ -54,7 +54,9 @@ export default function SpinPage() {
   const { toast } = useToast();
 
   const spinTheWheel = (isAdSpin: boolean) => {
+    if (isSpinning) return;
     setIsSpinning(true);
+
     if (isAdSpin) {
       setAdSpins((prev) => prev - 1);
     } else {
@@ -65,14 +67,20 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * totalRewards);
     const selectedReward = rewards[randomRewardIndex];
 
-    const baseRotation = 360 * 5; // 5 full rotations
-    const targetAngle = randomRewardIndex * segmentAngle;
-    const centerOffset = segmentAngle / 2;
-    // This calculation ensures the middle of the segment aligns with the top pointer.
-    const finalRotation = baseRotation - targetAngle - centerOffset - 90;
+    const spins = 5;
+    const fullSpinsRotation = 360 * spins;
+    const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // The required rotation to bring that middle angle to the top (270deg or -90deg position)
+    const alignmentRotation = 270 - targetSegmentMiddleAngle;
+    
+    // Get the wheel's current position within a single 360-degree circle
+    const currentAngle = wheelRotation % 360;
 
-    setWheelRotation(wheelRotation + finalRotation);
+    // Calculate the total rotation to add for this spin, accounting for the current position
+    const rotationToAdd = fullSpinsRotation + alignmentRotation - currentAngle;
 
+    setWheelRotation(wheelRotation + rotationToAdd);
 
     setTimeout(() => {
       setResult(selectedReward);
