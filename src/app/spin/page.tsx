@@ -72,17 +72,19 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
+    // The wheel spins for 5 full rotations, plus the amount to get to the target reward.
     const spins = 5;
     const baseRotation = spins * 360;
-    
+
+    // Calculate the angle for the middle of the target segment.
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
-    
-    // Correct alignment to make the middle of the segment stop at the top (270deg in math coords)
+
+    // The 'top' of the wheel in CSS rotation is 270 degrees. We need to align the middle of our target segment with that point.
+    // This calculation aligns the center of the selected segment to the top pointer.
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
     
-    const currentVisualRotation = wheelRotation % 360;
-    
-    const newRotation = (wheelRotation - currentVisualRotation) + baseRotation + alignmentRotation;
+    // We get the current rotation of the wheel and add the new calculated rotation.
+    const newRotation = wheelRotation + baseRotation + alignmentRotation;
 
     setWheelRotation(newRotation);
 
@@ -253,12 +255,12 @@ export default function SpinPage() {
               {/* Reward text */}
               {rewards.map((reward, i) => {
                   const angle = 360 / rewards.length;
-                  const textRotation = i * angle + angle / 2;
+                  const textAngle = i * angle + angle / 2;
                   return (
                       <div
                           key={i}
                           className="absolute top-0 left-0 w-full h-full flex justify-center"
-                          style={{ transform: `rotate(${textRotation}deg)` }}
+                          style={{ transform: `rotate(${textAngle}deg)` }}
                       >
                           <span
                               className="font-sans pt-4 text-xs font-bold text-black shadow-black/50 [text-shadow:_0_1px_2px_var(--tw-shadow-color)]"
@@ -304,15 +306,39 @@ export default function SpinPage() {
                           <span className="font-bold text-lg">{tonBalance.toFixed(1)}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                          <span className="font-medium text-muted-foreground">Rare Cards</span>
+                          <div className="flex items-center gap-3">
+                              <Image
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeia455e4qmfari4bsif24to44lgjtzwuwyut63aszg2h5e7s4ri2qy"
+                                alt="Card icon"
+                                width={24}
+                                height={24}
+                              />
+                              <span className="font-medium text-muted-foreground">Rare Cards</span>
+                          </div>
                           <span className="font-bold text-lg">{rareCards}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                          <span className="font-medium text-muted-foreground">Epic Cards</span>
+                          <div className="flex items-center gap-3">
+                              <Image
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeia455e4qmfari4bsif24to44lgjtzwuwyut63aszg2h5e7s4ri2qy"
+                                alt="Card icon"
+                                width={24}
+                                height={24}
+                              />
+                              <span className="font-medium text-muted-foreground">Epic Cards</span>
+                          </div>
                           <span className="font-bold text-lg">{epicCards}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                          <span className="font-medium text-muted-foreground">Mythic Cards</span>
+                          <div className="flex items-center gap-3">
+                              <Image
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeia455e4qmfari4bsif24to44lgjtzwuwyut63aszg2h5e7s4ri2qy"
+                                alt="Card icon"
+                                width={24}
+                                height={24}
+                              />
+                              <span className="font-medium text-muted-foreground">Mythic Cards</span>
+                          </div>
                           <span className="font-bold text-lg">{mythicCards}</span>
                       </div>
                   </div>
@@ -345,3 +371,5 @@ export default function SpinPage() {
     </>
   );
 }
+
+    
