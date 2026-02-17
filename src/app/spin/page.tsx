@@ -72,16 +72,19 @@ export default function SpinPage() {
     const randomRewardIndex = Math.floor(Math.random() * rewards.length);
     const selectedReward = rewards[randomRewardIndex];
     
-    const spins = 5;
+    const spins = 5; // number of full rotations
     const baseRotation = spins * 360;
 
-    const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
-    
+    // Calculate the target angle for the middle of the reward segment
+    const targetSegmentStartAngle = randomRewardIndex * segmentAngle;
+    const targetSegmentMiddleAngle = targetSegmentStartAngle + segmentAngle / 2;
+
     // This is the correct calculation.
     // CSS rotation starts from 0 at the top, but conic-gradient starts at 0 on the right.
     // There's a 90-degree offset.
     const alignmentRotation = -targetSegmentMiddleAngle + 90;
     
+    // Add the base rotation, the alignment rotation, and account for the current rotation
     const newRotation = baseRotation + alignmentRotation;
 
     setWheelRotation(prev => prev + newRotation);
@@ -330,7 +333,7 @@ export default function SpinPage() {
                       <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                               <Image
-                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeia455e4qmfari4bsif24to44lgjtzwuwyut63aszg2h5e7s4ri2qy"
+                                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidqm2w7kvkcxgowstbptive5vjyuwnabl5rcammfkkasjioabrxle"
                                 alt="Card icon"
                                 width={24}
                                 height={24}
