@@ -70,19 +70,13 @@ export default function SpinPage() {
     const spins = 5;
     const fullSpinsRotation = 360 * spins;
     
-    // The angle for the middle of the winning segment in the conic-gradient coordinate system (0 deg is right).
     const targetSegmentMiddleAngle = (randomRewardIndex * segmentAngle) + (segmentAngle / 2);
     
-    // The required rotation to bring that middle angle to the TOP.
-    // The pointer is at the top (12 o'clock). In CSS transform:rotate(), top is 0 degrees.
-    // In conic-gradient, top is 270 degrees.
-    // To align the target angle with the pointer at the top, we want the target's final angle to be 270.
+    // Align the target segment with the top pointer (270deg in conic-gradient coordinates)
     const alignmentRotation = 270 - targetSegmentMiddleAngle;
 
-    // Get the wheel's current position to ensure subsequent spins are correct.
     const currentAngle = wheelRotation % 360;
     
-    // Calculate the total rotation to add for this spin, accounting for the current position.
     const rotationToAdd = fullSpinsRotation + alignmentRotation - currentAngle;
 
     setWheelRotation(wheelRotation + rotationToAdd);
@@ -127,6 +121,20 @@ export default function SpinPage() {
   const getRewardComponent = () => {
     if (!result) return null;
 
+    if (result === 'Mythic Card') {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <Image
+            src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidq53erg4thcwtbjly4itqslwxeqx3m5iiv7tkhj74uydmoqz5ytm"
+            alt="Mythic Card"
+            width={120}
+            height={168}
+            className="rounded-lg shadow-lg"
+          />
+          <div className="text-4xl font-bold text-yellow-400">{result}</div>
+        </div>
+      );
+    }
     if (result.includes('TON')) {
         return (
             <div className="flex items-center gap-2 text-4xl font-bold text-cyan-400">
