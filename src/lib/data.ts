@@ -15,7 +15,7 @@ export const tasks: Task[] = [
   {
     id: 1,
     title: 'Watch Ads (3/3)',
-    reward: 300,
+    reward: 900,
     Icon: Clapperboard,
     href: '#',
   },
