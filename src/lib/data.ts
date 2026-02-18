@@ -121,6 +121,6 @@ export const upgrades: Upgrade[] = [
         level: 1,
         maxLevel: 3,
         costs: [5000, 10000],
-        benefits: ['+1000 Taps', '+2000 Taps']
+        benefits: ['+1000 Taps', '+2000 Taps', '+3000 Taps']
     }
 ]
