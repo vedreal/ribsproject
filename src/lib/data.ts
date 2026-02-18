@@ -93,15 +93,15 @@ export const upgrades: Upgrade[] = [
         maxLevel: 10,
         costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
         benefits: [
+            '+200 RIBS/2hr',
+            '+250 RIBS/2hr',
             '+300 RIBS/2hr',
             '+350 RIBS/2hr',
             '+400 RIBS/2hr',
             '+450 RIBS/2hr',
             '+500 RIBS/2hr',
             '+550 RIBS/2hr',
-            '+600 RIBS/2hr',
-            '+650 RIBS/2hr',
-            '+700 RIBS/2hr'
+            '+600 RIBS/2hr'
         ]
     },
     {

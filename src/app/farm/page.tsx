@@ -19,7 +19,7 @@ type FloatingNumber = {
   y: number;
 };
 
-const CLAIM_DURATION_MS = 5 * 1000; // Temporarily set to 5 seconds for testing
+const CLAIM_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
 const DAILY_TAPS = 1000;
 
 export default function FarmPage() {
@@ -35,6 +35,7 @@ export default function FarmPage() {
 
   const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
   const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1] : '...';
+  const claimAmount = farmingBenefit ? parseInt(farmingBenefit.match(/\d+/)?.[0] || '0') : 0;
 
 
   const getUserTitle = (balance: number): string => {
@@ -134,7 +135,7 @@ export default function FarmPage() {
   };
 
   const handleClaim = () => {
-    setBalance((prev) => prev + 10000); // Example claim amount
+    setBalance((prev) => prev + claimAmount);
     setClaimTime(Date.now() + CLAIM_DURATION_MS);
   };
 
