@@ -19,7 +19,6 @@ type FloatingNumber = {
 };
 
 const CLAIM_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
-const DAILY_TAPS = 1000;
 
 export default function FarmPage() {
   const [balance, setBalance] = useState(9800000);
@@ -40,6 +39,10 @@ export default function FarmPage() {
   const tapPowerUpgrade = upgrades.find(u => u.id === 'tap-power');
   const tapPowerBenefit = tapPowerUpgrade ? tapPowerUpgrade.benefits[tapPowerUpgrade.level - 1] : '+1 RIBS/tap';
   const tapAmount = tapPowerUpgrade ? parseInt(tapPowerBenefit.match(/\d+/)?.[0] || '1') : 1;
+
+  const tapEnergyUpgrade = upgrades.find(u => u.id === 'tap-energy');
+  const tapEnergyBenefit = tapEnergyUpgrade ? tapEnergyUpgrade.benefits[tapEnergyUpgrade.level - 1] : '+1000 Taps';
+  const dailyTaps = tapEnergyUpgrade ? parseInt(tapEnergyBenefit.match(/\d+/)?.[0] || '1000') : 1000;
 
 
   const getUserTitle = (balance: number): string => {
@@ -261,10 +264,10 @@ export default function FarmPage() {
                   <>
                     <p className="text-lg font-bold">
                       {tapsLeft.toLocaleString('en-US')}
-                      / {DAILY_TAPS.toLocaleString('en-US')}
+                      / {dailyTaps.toLocaleString('en-US')}
                     </p>
                     <Progress
-                      value={(tapsLeft / DAILY_TAPS) * 100}
+                      value={(tapsLeft / dailyTaps) * 100}
                       className="h-3"
                     />
                   </>
