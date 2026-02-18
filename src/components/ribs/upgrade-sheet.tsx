@@ -9,15 +9,13 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { upgrades as initialUpgrades, type Upgrade } from '@/lib/data';
-import { useState, useEffect } from 'react';
+import { type Upgrade } from '@/lib/data';
 import { RibsIcon } from './ribs-icon';
-import { toast } from '@/hooks/use-toast';
 import { Flame, Zap, Gem } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const iconMap: { [key: string]: React.FC<any> } = {
-    'farming-rate': Flame,
+    'faucet-rate': Flame,
     'tap-power': Zap,
     'tap-energy': Gem,
 };
@@ -25,29 +23,14 @@ const iconMap: { [key: string]: React.FC<any> } = {
 export function UpgradeSheet({
   isOpen,
   onOpenChange,
+  upgrades,
+  handleUpgrade,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  upgrades: Upgrade[];
+  handleUpgrade: (upgradeId: string) => void;
 }) {
-  const [upgrades, setUpgrades] = useState<Upgrade[]>(initialUpgrades);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const handleUpgrade = (upgradeId: string) => {
-    // In a real app, you'd check if the user has enough coins
-    // and make an API call. Here we just show a toast.
-    const upgrade = upgrades.find(u => u.id === upgradeId);
-    if(upgrade) {
-        toast({
-            title: `Upgraded ${upgrade.name}!`,
-            description: `You've successfully upgraded to level ${upgrade.level + 1}.`,
-        });
-        // You could optimistically update the UI here.
-    }
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -55,7 +38,7 @@ export function UpgradeSheet({
         <SheetHeader className="p-6 pb-2">
           <SheetTitle className="font-headline text-3xl">Upgrades</SheetTitle>
           <SheetDescription>
-            Increase your RIBS income by upgrading your farm.
+            Increase your RIBS income by upgrading your faucet.
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1">
@@ -86,7 +69,7 @@ export function UpgradeSheet({
                 <Button className="w-full font-bold bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 hover:brightness-95" onClick={() => handleUpgrade(upgrade.id)} disabled={currentLevel >= maxLevel}>
                     {currentLevel >= maxLevel ? 'Max Level' : (
                         <>
-                            Upgrade for <RibsIcon className="w-4 h-4 inline-block mx-1" /> {isMounted ? cost.toLocaleString() : cost.toLocaleString('en-US')}
+                            Upgrade for <RibsIcon className="w-4 h-4 inline-block mx-1" /> {cost.toLocaleString()}
                         </>
                     )}
                 </Button>

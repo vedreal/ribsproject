@@ -10,7 +10,7 @@ import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
-import { upgrades } from '@/lib/data';
+import { upgrades as initialUpgrades, type Upgrade } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 
 type FloatingNumber = {
@@ -32,10 +32,11 @@ export default function FarmPage() {
   const [checkInCount, setCheckInCount] = useState(1);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   const { toast } = useToast();
+  const [upgrades, setUpgrades] = useState<Upgrade[]>(initialUpgrades);
 
-  const farmingUpgrade = upgrades.find(u => u.id === 'farming-rate');
-  const farmingBenefit = farmingUpgrade ? farmingUpgrade.benefits[farmingUpgrade.level - 1] : '...';
-  const claimAmount = farmingBenefit ? parseInt(farmingBenefit.match(/\d+/)?.[0] || '0') : 0;
+  const faucetUpgrade = upgrades.find(u => u.id === 'faucet-rate');
+  const faucetBenefit = faucetUpgrade ? faucetUpgrade.benefits[faucetUpgrade.level - 1] : '...';
+  const claimAmount = faucetBenefit ? parseInt(faucetBenefit.match(/\d+/)?.[0] || '0') : 0;
 
 
   const getUserTitle = (balance: number): string => {
@@ -139,6 +140,47 @@ export default function FarmPage() {
     setClaimTime(Date.now() + CLAIM_DURATION_MS);
   };
 
+  const handleUpgrade = (upgradeId: string) => {
+    const upgradeIndex = upgrades.findIndex(u => u.id === upgradeId);
+    if (upgradeIndex === -1) return;
+
+    const upgrade = upgrades[upgradeIndex];
+    if (upgrade.level >= upgrade.maxLevel) {
+      toast({
+        variant: "destructive",
+        title: "Max Level Reached",
+        description: "This upgrade is already at its maximum level.",
+      });
+      return;
+    }
+
+    const cost = upgrade.costs[upgrade.level - 1];
+
+    if (balance >= cost) {
+      setBalance(prev => prev - cost);
+
+      const newUpgrades = [...upgrades];
+      const newLevel = newUpgrades[upgradeIndex].level + 1;
+      newUpgrades[upgradeIndex] = {
+        ...newUpgrades[upgradeIndex],
+        level: newLevel,
+      };
+      setUpgrades(newUpgrades);
+
+      toast({
+        title: `Upgraded ${upgrade.name}!`,
+        description: `You've successfully upgraded to level ${newLevel}.`,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Not enough RIBS!",
+        description: `You need ${cost.toLocaleString()} RIBS to upgrade.`,
+      });
+    }
+  };
+
+
   return (
     <>
       <AppLayout>
@@ -233,7 +275,7 @@ export default function FarmPage() {
                   <div className='flex flex-col'>
                     <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Faucet Claim :</h2>
                     <p className="text-sm text-muted-foreground pt-1">
-                      Faucet Rate : {farmingBenefit}
+                      Faucet Rate : {faucetBenefit}
                     </p>
                   </div>
                   <div className='flex flex-col items-end gap-2'>
@@ -264,6 +306,8 @@ export default function FarmPage() {
           <UpgradeSheet
             isOpen={isUpgradeSheetOpen}
             onOpenChange={setIsUpgradeSheetOpen}
+            upgrades={upgrades}
+            handleUpgrade={handleUpgrade}
           />
         </div>
       </AppLayout>

@@ -86,9 +86,9 @@ export type Upgrade = {
 
 export const upgrades: Upgrade[] = [
     {
-        id: 'farming-rate',
-        name: 'Farming Rate',
-        description: 'Increase the amount of RIBS you earn from passive farming.',
+        id: 'faucet-rate',
+        name: 'Faucet Rate',
+        description: 'Increase the amount of RIBS you earn from the faucet.',
         level: 1,
         maxLevel: 10,
         costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
