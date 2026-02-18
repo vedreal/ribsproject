@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -36,11 +35,11 @@ export default function FarmPage() {
 
   const faucetUpgrade = upgrades.find(u => u.id === 'faucet-rate');
   const faucetBenefit = faucetUpgrade ? faucetUpgrade.benefits[faucetUpgrade.level - 1] : '...';
-  const claimAmount = faucetBenefit ? parseInt(faucetBenefit.match(/\d+/)?.[0] || '0') : 0;
+  const claimAmount = faucetUpgrade ? parseInt(faucetUpgrade.benefits[faucetUpgrade.level - 1].match(/\d+/)?.[0] || '0') : 200;
 
   const tapPowerUpgrade = upgrades.find(u => u.id === 'tap-power');
   const tapPowerBenefit = tapPowerUpgrade ? tapPowerUpgrade.benefits[tapPowerUpgrade.level - 1] : '+1 RIBS/tap';
-  const tapAmount = tapPowerBenefit ? parseInt(tapPowerBenefit.match(/\d+/)?.[0] || '1') : 1;
+  const tapAmount = tapPowerUpgrade ? parseInt(tapPowerBenefit.match(/\d+/)?.[0] || '1') : 1;
 
 
   const getUserTitle = (balance: number): string => {
@@ -190,7 +189,7 @@ export default function FarmPage() {
       <AppLayout>
         <div className="relative">
           <div className="flex justify-between items-start mb-4">
-            <div className="flex items-start gap-2 pt-8">
+            <div className="flex flex-col items-start gap-2 pt-8">
               <Button
                 onClick={handleCheckIn}
                 disabled={hasCheckedInToday}
