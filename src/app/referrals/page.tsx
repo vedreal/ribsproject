@@ -10,11 +10,11 @@ import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { Input } from '@/components/ui/input';
 
 const referrals = [
-    { name: 'cypher', ribs: 10000 },
-    { name: 'vortex', ribs: 10000 },
-    { name: 'nova', ribs: 5000 },
-    { name: 'echo', ribs: 5000 },
-    { name: 'pulse', ribs: 2500 },
+    { name: 'cypher', ribs: 100 },
+    { name: 'vortex', ribs: 100 },
+    { name: 'nova', ribs: 100 },
+    { name: 'echo', ribs: 100 },
+    { name: 'pulse', ribs: 100 },
 ];
 
 export default function ReferralsPage() {
@@ -45,7 +45,7 @@ export default function ReferralsPage() {
             <p className="text-sm text-muted-foreground">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
             <div className="flex items-center gap-2 pt-2">
                 <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
-                <Button size="icon" onClick={handleCopy} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 hover:brightness-95">
+                <Button size="icon" onClick={handleCopy} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
             </div>
