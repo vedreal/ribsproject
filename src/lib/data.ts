@@ -101,7 +101,8 @@ export const upgrades: Upgrade[] = [
             '+450 RIBS/2hr',
             '+500 RIBS/2hr',
             '+550 RIBS/2hr',
-            '+600 RIBS/2hr'
+            '+600 RIBS/2hr',
+            '+650 RIBS/2hr'
         ]
     },
     {
