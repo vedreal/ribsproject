@@ -38,6 +38,10 @@ export default function FarmPage() {
   const faucetBenefit = faucetUpgrade ? faucetUpgrade.benefits[faucetUpgrade.level - 1] : '...';
   const claimAmount = faucetBenefit ? parseInt(faucetBenefit.match(/\d+/)?.[0] || '0') : 0;
 
+  const tapPowerUpgrade = upgrades.find(u => u.id === 'tap-power');
+  const tapPowerBenefit = tapPowerUpgrade ? tapPowerUpgrade.benefits[tapPowerUpgrade.level - 1] : '+1 RIBS/tap';
+  const tapAmount = tapPowerBenefit ? parseInt(tapPowerBenefit.match(/\d+/)?.[0] || '1') : 1;
+
 
   const getUserTitle = (balance: number): string => {
     if (balance >= 300000) return 'Legend';
@@ -117,7 +121,7 @@ export default function FarmPage() {
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (tapsLeft <= 0) return;
 
-    setBalance((prev) => prev + 1);
+    setBalance((prev) => prev + tapAmount);
     setTapsLeft((prev) => prev - 1);
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -185,8 +189,8 @@ export default function FarmPage() {
     <>
       <AppLayout>
         <div className="relative">
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex flex-col items-start gap-2">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-start gap-2 pt-8">
               <Button
                 onClick={handleCheckIn}
                 disabled={hasCheckedInToday}
@@ -204,7 +208,7 @@ export default function FarmPage() {
             </div>
             <div
               className={cn(
-                'text-xs font-bold px-3 py-1.5 rounded-full shadow-md',
+                'text-xs font-bold px-3 py-1.5 rounded-full shadow-md mt-8',
                 getTitleClasses(userTitle)
               )}
             >
@@ -237,7 +241,7 @@ export default function FarmPage() {
                     className="tap-float-animation absolute text-3xl font-bold text-primary pointer-events-none"
                     style={{ left: num.x, top: num.y }}
                   >
-                    +1
+                    +{tapAmount}
                   </span>
                 ))}
               </button>

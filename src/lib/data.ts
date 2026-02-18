@@ -112,7 +112,7 @@ export const upgrades: Upgrade[] = [
         level: 1,
         maxLevel: 3,
         costs: [3000, 6000],
-        benefits: ['+5 RIBS/tap', '+10 RIBS/tap']
+        benefits: ['+1 RIBS/tap', '+2 RIBS/tap', '+5 RIBS/tap']
     },
     {
         id: 'tap-energy',
