@@ -8,11 +8,28 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { AppLayout } from '@/components/ribs/app-layout';
-import { leaderboardData } from '@/lib/data';
+import { leaderboardData as top100Data, userProfile } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 export default function LeaderboardPage() {
+  const isUserInTop100 = userProfile.rank <= 100;
+  
+  const displayData = [...top100Data];
+
+  if (isUserInTop100) {
+    const userIndex = userProfile.rank - 1;
+    if (userIndex >= 0 && userIndex < 100) {
+        displayData[userIndex] = {
+            rank: userProfile.rank,
+            username: userProfile.username,
+            avatarSeed: 'you',
+            ribs: userProfile.totalRibs,
+            isCurrentUser: true,
+        };
+    }
+  }
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -31,7 +48,7 @@ export default function LeaderboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaderboardData.map((user) => (
+              {displayData.map((user) => (
                 <TableRow
                   key={user.rank}
                   className={cn(
@@ -63,6 +80,15 @@ export default function LeaderboardPage() {
             </TableBody>
           </Table>
         </div>
+
+        {!isUserInTop100 && (
+          <div className="rounded-xl bg-gradient-to-br from-primary/10 to-card/10 border border-primary/20 p-6 text-center">
+            <p className="text-lg font-semibold">You are ranked #{userProfile.rank}</p>
+            <div className="flex items-center justify-center gap-2 font-semibold text-primary mt-1">
+                <RibsIcon className="w-4 h-4" /> {userProfile.totalRibs.toLocaleString()}
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

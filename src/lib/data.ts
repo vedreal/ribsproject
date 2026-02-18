@@ -49,27 +49,30 @@ export type LeaderboardUser = {
   isCurrentUser?: boolean;
 };
 
-export const leaderboardData: LeaderboardUser[] = [
-    { rank: 1, username: 'cypher', avatarSeed: 'cypher', ribs: 12500000, },
-    { rank: 2, username: 'vortex', avatarSeed: 'vortex', ribs: 11800000, },
-    { rank: 3, username: 'nova', avatarSeed: 'nova', ribs: 11200000, },
-    { rank: 4, username: 'zenith', avatarSeed: 'zenith', ribs: 10500000, },
-    { rank: 5, username: 'You', avatarSeed: 'you', ribs: 9800000, isCurrentUser: true },
-    { rank: 6, username: 'echo', avatarSeed: 'echo', ribs: 9200000, },
-    { rank: 7, username: 'pulse', avatarSeed: 'pulse', ribs: 8500000, },
-    { rank: 8, username: 'triton', avatarSeed: 'triton', ribs: 7800000, },
-    { rank: 9, username: 'solaris', avatarSeed: 'solaris', ribs: 7100000, },
-    { rank: 10, username: 'lyra', avatarSeed: 'lyra', ribs: 6400000, },
-];
+const sampleUsernames = ['cypher', 'vortex', 'nova', 'zenith', 'echo', 'pulse', 'triton', 'solaris', 'lyra', 'orion', 'ace', 'blaze', 'case', 'drake', 'ember', 'fang', 'gale', 'hawk', 'iris', 'jade'];
+
+export const leaderboardData: LeaderboardUser[] = Array.from({ length: 100 }, (_, i) => {
+    const rank = i + 1;
+    const baseRibs = 12500000;
+    const ribs = baseRibs - (rank * 50000) - Math.floor(Math.random() * 40000);
+    const username = `${sampleUsernames[i % sampleUsernames.length]}${rank}`;
+    return {
+        rank,
+        username,
+        avatarSeed: username,
+        ribs,
+    };
+});
 
 export const userProfile = {
-    username: 'Zenith',
+    username: 'You',
+    rank: 123,
     joinDate: '15-07-2024',
     totalRibs: 9800000,
     totalReferrals: 12,
     referralCode: 'ZENITHFARM123',
     email: 'zenith@example.com'
-}
+};
 
 export type Upgrade = {
     id: string;
