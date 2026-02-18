@@ -6,6 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { leaderboardData as top100Data, userProfile } from '@/lib/data';
@@ -78,17 +79,35 @@ export default function LeaderboardPage() {
                 </TableRow>
               ))}
             </TableBody>
+            {!isUserInTop100 && (
+              <TableFooter>
+                <TableRow
+                  className="bg-primary/10 hover:bg-primary/20"
+                >
+                  <TableCell className="font-medium text-lg">{userProfile.rank}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={`https://picsum.photos/seed/you/40/40`}
+                        alt={userProfile.username}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                        data-ai-hint="avatar"
+                      />
+                      <span className="font-medium">{userProfile.username}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2 font-semibold">
+                     <RibsIcon className="w-4 h-4" /> {userProfile.totalRibs.toLocaleString()}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
         </div>
-
-        {!isUserInTop100 && (
-          <div className="rounded-xl bg-gradient-to-br from-primary/10 to-card/10 border border-primary/20 p-6 text-center">
-            <p className="text-lg font-semibold">You are ranked #{userProfile.rank}</p>
-            <div className="flex items-center justify-center gap-2 font-semibold text-primary mt-1">
-                <RibsIcon className="w-4 h-4" /> {userProfile.totalRibs.toLocaleString()}
-            </div>
-          </div>
-        )}
       </div>
     </AppLayout>
   );
