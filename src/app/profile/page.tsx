@@ -21,6 +21,17 @@ function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title
 export default function ProfilePage() {
     const [email, setEmail] = useState(userProfile.email || '');
 
+    const getUserTitle = (balance: number): string => {
+      if (balance >= 300000) return 'Legend';
+      if (balance >= 100000) return 'Grandmaster';
+      if (balance >= 50000) return 'Master';
+      if (balance >= 25000) return 'Elite';
+      if (balance >= 10000) return 'Skilled';
+      return 'Beginner';
+    };
+
+    const userTitle = getUserTitle(userProfile.totalRibs);
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -35,7 +46,7 @@ export default function ProfilePage() {
           />
           <div>
             <h1 className="text-3xl font-headline font-bold">{userProfile.username}</h1>
-            <p className="text-muted-foreground">Welcome to your farm!</p>
+            <p className="text-muted-foreground">You are {userTitle}</p>
           </div>
         </header>
 
