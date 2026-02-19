@@ -18,6 +18,35 @@ const iconMap: Record<string, ElementType> = {
   Send,
 };
 
+export const tasks: Task[] = [
+    {
+        id: 1,
+        title: 'Join our Telegram Channel',
+        reward: 5000,
+        Icon: Send,
+        href: 'https://t.me/ribs_announcements'
+    },
+    {
+        id: 2,
+        title: 'Follow us on X',
+        reward: 3000,
+        Icon: XIcon,
+        href: 'https://x.com/ribs_project'
+    }
+];
+
+export const leaderboardData = [
+    { rank: 1, username: 'RibsMaster', avatarSeed: '1', ribs: 1000000 },
+    { rank: 2, username: 'TappingPro', avatarSeed: '2', ribs: 850000 },
+];
+
+export const userProfile = {
+    rank: 150,
+    username: 'Player123',
+    referralCode: 'REF123',
+    totalRibs: 12500,
+};
+
 export async function getTasks(): Promise<Task[]> {
   const { data, error } = await supabase.from('tasks').select('*');
   if (error) {

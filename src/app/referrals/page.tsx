@@ -22,7 +22,7 @@ export default function ReferralsPage() {
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = () => {
-        const referralLink = `https://t.me/ribs_bot?start=${userProfile.referralCode}`;
+        const referralLink = `https://t.me/ribs_bot?start=${userProfile?.referralCode || ''}`;
         navigator.clipboard.writeText(referralLink);
         setIsCopied(true);
         toast({
@@ -44,7 +44,7 @@ export default function ReferralsPage() {
             <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Invite Link</h2>
             <p className="text-sm text-muted-foreground">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
             <div className="flex items-center gap-2 pt-2">
-                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile.referralCode}`} />
+                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile?.referralCode || ''}`} />
                 <Button size="icon" onClick={handleCopy} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>

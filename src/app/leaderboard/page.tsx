@@ -9,17 +9,18 @@ import {
   TableFooter,
 } from '@/components/ui/table';
 import { AppLayout } from '@/components/ribs/app-layout';
-import { leaderboardData as top100Data, userProfile } from '@/lib/data';
+import { leaderboardData, userProfile } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 export default function LeaderboardPage() {
-  const isUserInTop100 = (userProfile as any).rank <= 100;
+  const userRank = (userProfile as any)?.rank || 0;
+  const isUserInTop100 = userRank > 0 && userRank <= 100;
   
-  const displayData = top100Data ? [...top100Data] : [] as any[];
+  const displayData = leaderboardData ? [...leaderboardData] : [] as any[];
 
   if (isUserInTop100 && userProfile) {
-    const userIndex = userProfile.rank - 1;
+    const userIndex = userRank - 1;
     if (userIndex >= 0 && userIndex < 100) {
         displayData[userIndex] = {
             rank: userProfile.rank,
