@@ -6,8 +6,17 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT,
     last_name TEXT,
     ribs BIGINT DEFAULT 0,
+    photo_url TEXT,
+    last_checkin TIMESTAMP WITH TIME ZONE,
+    checkin_count INTEGER DEFAULT 0,
+    next_faucet_claim TIMESTAMP WITH TIME ZONE,
+    ton_balance FLOAT DEFAULT 0,
+    rare_cards INTEGER DEFAULT 0,
+    epic_cards INTEGER DEFAULT 0,
+    mythic_cards INTEGER DEFAULT 0,
     referral_code TEXT UNIQUE,
     referred_by BIGINT REFERENCES users(id),
+    referrer_id BIGINT REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

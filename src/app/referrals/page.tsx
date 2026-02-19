@@ -9,13 +9,26 @@ import { useState } from 'react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { Input } from '@/components/ui/input';
 
-const referrals = [
-    { name: 'cypher', ribs: 100 },
-    { name: 'vortex', ribs: 100 },
-    { name: 'nova', ribs: 100 },
-    { name: 'echo', ribs: 100 },
-    { name: 'pulse', ribs: 100 },
-];
+    const [referrals, setReferrals] = useState<{ name: string; ribs: number }[]>([]);
+    const { user: tgUser } = useTelegram();
+
+    useEffect(() => {
+        if (!tgUser?.id) return;
+        const fetchReferrals = async () => {
+            const { data, error } = await supabase
+                .from('users')
+                .select('username, first_name')
+                .eq('referrer_id', tgUser.id);
+            
+            if (data) {
+                setReferrals(data.map(u => ({
+                    name: u.username || u.first_name || 'Anonymous',
+                    ribs: 100 // Example reward per referral
+                })));
+            }
+        };
+        fetchReferrals();
+    }, [tgUser?.id]);
 
 export default function ReferralsPage() {
     const { toast } = useToast();

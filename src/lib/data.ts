@@ -112,19 +112,68 @@ export async function syncUser(user: { id: number; username?: string; first_name
   }
 }
 
-export async function updateUserRibs(telegramId: number, amount: number) {
-    const { data, error } = await supabase.rpc('increment_ribs', { 
-        user_id: telegramId, 
-        amount: amount 
-    });
-    
-    if (error) {
-        // Fallback if RPC doesn't exist yet
-        const { data: user } = await supabase.from('users').select('ribs').eq('id', telegramId).single();
-        if (user) {
-            await supabase.from('users').update({ ribs: user.ribs + amount }).eq('id', telegramId);
-        }
+export async function checkIn(telegramId: number) {
+  const { data: user } = await supabase.from('users').select('last_checkin, checkin_count').eq('id', telegramId).single();
+  if (!user) return { success: false, message: 'User not found' };
+
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+  
+  if (user.last_checkin) {
+    const lastDate = new Date(user.last_checkin).toISOString().split('T')[0];
+    const todayDate = today.split('T')[0];
+    if (lastDate === todayDate) {
+      return { success: false, message: 'Already checked in today' };
     }
+  }
+
+  const newCount = (user.checkin_count || 0) + 1;
+  const { error } = await supabase.from('users').update({
+    last_checkin: today,
+    checkin_count: newCount,
+    ribs: (user.ribs || 0) + 200
+  }).eq('id', telegramId);
+
+  if (error) return { success: false, message: error.message };
+  return { success: true, count: newCount };
+}
+
+export async function claimFaucet(telegramId: number, amount: number) {
+  const nextClaim = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+  const { error } = await supabase.from('users').update({
+    next_faucet_claim: nextClaim,
+    ribs: supabase.rpc('increment_ribs', { user_id: telegramId, amount })
+  }).eq('id', telegramId);
+  
+  if (error) {
+     // Fallback if RPC fails
+     const { data: user } = await supabase.from('users').select('ribs').eq('id', telegramId).single();
+     await supabase.from('users').update({ 
+       ribs: (user?.ribs || 0) + amount,
+       next_faucet_claim: nextClaim 
+     }).eq('id', telegramId);
+  }
+  return nextClaim;
+}
+
+export async function saveSpinReward(telegramId: number, reward: string) {
+  const { data: user } = await supabase.from('users').select('*').eq('id', telegramId).single();
+  if (!user) return;
+
+  const update: any = { ribs: user.ribs || 0 };
+  if (reward.includes('TON')) {
+    update.ton_balance = (user.ton_balance || 0) + parseFloat(reward.split(' ')[0]);
+  } else if (reward.includes('RIBS')) {
+    update.ribs += parseInt(reward.split(' ')[0]);
+  } else if (reward === 'Rare Card') {
+    update.rare_cards = (user.rare_cards || 0) + 1;
+  } else if (reward === 'Epic Card') {
+    update.epic_cards = (user.epic_cards || 0) + 1;
+  } else if (reward === 'Mythic Card') {
+    update.mythic_cards = (user.mythic_cards || 0) + 1;
+  }
+
+  await supabase.from('users').update(update).eq('id', telegramId);
 }
 
 export type Upgrade = {

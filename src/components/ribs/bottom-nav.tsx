@@ -6,6 +6,8 @@ import { Flame, CheckSquare, Trophy, User, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
+import { useTelegram } from '@/components/telegram-provider';
+
 const navItems = [
   { href: '/farm', label: 'Earn', icon: Flame },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
@@ -16,6 +18,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user: tgUser } = useTelegram();
 
   return (
     <nav className="h-16 bg-card/5 backdrop-blur-xl rounded-lg border border-border/5 shadow-2xl">
@@ -35,18 +38,26 @@ export function BottomNav() {
                 )}
               >
                 {item.href === '/profile' ? (
-                  <Image
-                    src="https://picsum.photos/seed/you/24/24"
-                    alt="Profile"
-                    width={24}
-                    height={24}
-                    className={cn(
-                      "rounded-full transition-all border-2",
-                      isActive ? "border-accent" : "border-transparent",
-                      "group-hover:border-foreground/50"
-                    )}
-                    data-ai-hint="avatar"
-                  />
+                  tgUser?.photo_url ? (
+                    <Image
+                      src={tgUser.photo_url}
+                      alt="Profile"
+                      width={24}
+                      height={24}
+                      className={cn(
+                        "rounded-full transition-all border-2",
+                        isActive ? "border-accent" : "border-transparent",
+                        "group-hover:border-foreground/50 h-6 w-6 object-cover"
+                      )}
+                    />
+                  ) : (
+                    <div className={cn(
+                        "h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center border-2",
+                        isActive ? "border-accent" : "border-transparent"
+                    )}>
+                        <User className="h-4 w-4 text-primary" />
+                    </div>
+                  )
                 ) : (
                   <item.icon
                     className={cn(

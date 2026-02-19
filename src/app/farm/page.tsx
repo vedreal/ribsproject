@@ -31,27 +31,46 @@ export default function FarmPage() {
   const { user: tgUser, isLoading } = useTelegram();
   const userId = tgUser?.id ?? null;
 
-  // ✅ Load user balance dari Supabase saat userId tersedia
+  const [isActivated, setIsActivated] = useState(false);
+
+  // ✅ Load user data dari Supabase saat userId tersedia
   useEffect(() => {
     if (!userId) return;
 
-    const fetchBalance = async () => {
+    const fetchUserData = async () => {
       const profile = await getUserProfile(userId);
       if (profile) {
         setBalance(profile.ribs ?? 0);
+        setCheckInCount(profile.checkin_count ?? 0);
+        
+        if (profile.last_checkin) {
+          const lastDate = new Date(profile.last_checkin).toISOString().split('T')[0];
+          const todayDate = new Date().toISOString().split('T')[0];
+          setHasCheckedInToday(lastDate === todayDate);
+        }
+
+        if (profile.next_faucet_claim) {
+          const nextClaim = new Date(profile.next_faucet_claim).getTime();
+          setClaimTime(nextClaim);
+          setIsActivated(true);
+        } else {
+          setIsActivated(false);
+          setClaimTime(null);
+        }
       }
     };
 
-    fetchBalance();
-    setClaimTime(Date.now() + CLAIM_DURATION_MS);
+    fetchUserData();
   }, [userId]);
 
-  // Fallback: set claim time jika tidak ada userId (guest mode)
-  useEffect(() => {
-    if (!isLoading && !userId) {
-      setClaimTime(Date.now() + CLAIM_DURATION_MS);
-    }
-  }, [isLoading, userId]);
+  const handleActivate = async () => {
+    if (!userId) return;
+    const nextClaim = Date.now() + CLAIM_DURATION_MS;
+    setClaimTime(nextClaim);
+    setIsActivated(true);
+    await supabase.from('users').update({ next_faucet_claim: new Date(nextClaim).toISOString() }).eq('id', userId);
+    toast({ title: 'Faucet Activated!' });
+  };
 
   // ── Upgrade computed values ──────────────────────────────
   const faucetUpgrade = upgrades.find(u => u.id === 'faucet-rate');

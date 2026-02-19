@@ -51,15 +51,21 @@ export default function ProfilePage() {
     <AppLayout>
       <div className="space-y-8">
         <header className="flex flex-col items-center text-center space-y-4">
-          <Image
-            src={`https://picsum.photos/seed/${user?.username || 'user'}/100/100`}
-            alt={user?.username || 'User'}
-            width={100}
-            height={100}
-            className="rounded-full border-4 border-primary"
-          />
+          {user?.photo_url ? (
+            <Image
+              src={user.photo_url}
+              alt={user?.username || 'User'}
+              width={100}
+              height={100}
+              className="rounded-full border-4 border-primary object-cover w-24 h-24"
+            />
+          ) : (
+             <div className="w-24 h-24 rounded-full border-4 border-primary bg-primary/10 flex items-center justify-center">
+                <User className="w-12 h-12 text-primary" />
+             </div>
+          )}
           <div>
-            <h1 className="text-3xl font-headline font-bold">{user?.username || 'User'}</h1>
+            <h1 className="text-3xl font-headline font-bold">{user?.username || user?.first_name || 'User'}</h1>
             <p className="text-muted-foreground">You are {userTitle}</p>
           </div>
         </header>

@@ -82,9 +82,9 @@ export default function SpinPage() {
     // This is the correct calculation.
     // CSS rotation starts from 0 at the top, but conic-gradient starts at 0 on the right.
     // There's a 90-degree offset.
-    const alignmentRotation = -targetSegmentMiddleAngle + 90;
+    const alignmentRotation = 360 - targetSegmentMiddleAngle;
     
-    // Add the base rotation, the alignment rotation, and account for the current rotation
+    // Add multiple spins for effect, plus the alignment to the top
     const newRotation = baseRotation + alignmentRotation;
 
     setWheelRotation(prev => prev + newRotation);
@@ -233,8 +233,8 @@ export default function SpinPage() {
           <p className="text-muted-foreground">Test your luck and win big!</p>
         </header>
 
-        <div className="flex flex-col items-center gap-8">
-          <div className="relative w-80 h-80 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-8 w-full max-w-full overflow-hidden">
+          <div className="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center shrink-0">
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
                 <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-primary drop-shadow-lg"></div>
             </div>
