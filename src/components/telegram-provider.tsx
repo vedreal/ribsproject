@@ -33,7 +33,8 @@ function UserSync({ children }: PropsWithChildren) {
         console.log('Syncing user to Supabase:', user);
 
         try {
-          const { error } = await supabase
+          console.log('Attempting upsert for user:', user.id);
+          const { data, error } = await supabase
             .from('users')
             .upsert({
               id: user.id,
@@ -41,18 +42,17 @@ function UserSync({ children }: PropsWithChildren) {
               first_name: user.first_name || '',
               last_name: user.last_name || '',
               referral_code: `ref_${user.id}`,
-            }, { onConflict: 'id' });
+            }, { onConflict: 'id' })
+            .select();
 
           if (error) {
             console.error('Error syncing user to Supabase:', error);
-            // Try to fetch to see if it exists but upsert failed due to RLS/indexing
-            const { data: existingUser } = await supabase.from('users').select('id').eq('id', user.id).single();
-            if (existingUser) {
-              console.log('User already exists in Supabase');
-              setSynced(true);
+            // Check if it's a permission error or something else
+            if (error.code === '42501') {
+               console.error('RLS Policy might be blocking the upsert. Please check Supabase policies.');
             }
           } else {
-            console.log('User synced successfully');
+            console.log('User synced successfully:', data);
             setSynced(true);
           }
         } catch (e) {
