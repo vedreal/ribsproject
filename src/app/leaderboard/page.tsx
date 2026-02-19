@@ -14,11 +14,11 @@ import { cn } from '@/lib/utils';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 export default function LeaderboardPage() {
-  const isUserInTop100 = userProfile.rank <= 100;
+  const isUserInTop100 = (userProfile as any).rank <= 100;
   
-  const displayData = [...top100Data];
+  const displayData = top100Data ? [...top100Data] : [] as any[];
 
-  if (isUserInTop100) {
+  if (isUserInTop100 && userProfile) {
     const userIndex = userProfile.rank - 1;
     if (userIndex >= 0 && userIndex < 100) {
         displayData[userIndex] = {
@@ -49,7 +49,7 @@ export default function LeaderboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {displayData.map((user) => (
+              {displayData.map((user: any) => (
                 <TableRow
                   key={user.rank}
                   className={cn(
@@ -79,7 +79,7 @@ export default function LeaderboardPage() {
                 </TableRow>
               ))}
             </TableBody>
-            {!isUserInTop100 && (
+            {!isUserInTop100 && userProfile && (
               <TableFooter>
                 <TableRow
                   className="bg-primary/10 hover:bg-primary/20"
