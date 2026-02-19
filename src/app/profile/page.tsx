@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { getUserProfile } from '@/lib/data';
-import { Calendar, Users, HelpCircle } from 'lucide-react';
+import { Calendar, Users, HelpCircle, User as UserIcon } from 'lucide-react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
 function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title: string, value: string | number }) {
@@ -61,7 +61,7 @@ export default function ProfilePage() {
             />
           ) : (
              <div className="w-24 h-24 rounded-full border-4 border-primary bg-primary/10 flex items-center justify-center">
-                <User className="w-12 h-12 text-primary" />
+                <UserIcon className="w-12 h-12 text-primary" />
              </div>
           )}
           <div>
