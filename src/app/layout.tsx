@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { TelegramProvider } from '@/components/telegram-provider';
 
 export const metadata: Metadata = {
   title: 'RIBS Farm',
@@ -27,7 +28,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background text-foreground selection:bg-primary/20">
-        {children}
+        <TelegramProvider>
+          {children}
+        </TelegramProvider>
         <Toaster />
       </body>
     </html>

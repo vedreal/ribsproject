@@ -1,6 +1,7 @@
 import { Send, Clapperboard, Users } from 'lucide-react';
 import { XIcon } from '@/components/ribs/x-icon';
 import type { ElementType } from 'react';
+import { supabase } from './supabase';
 
 export type Task = {
   id: number;
@@ -10,36 +11,24 @@ export type Task = {
   href: string;
 };
 
-export const tasks: Task[] = [
-  {
-    id: 1,
-    title: 'Watch Ads (3/3)',
-    reward: 900,
-    Icon: Clapperboard,
-    href: '#',
-  },
-  {
-    id: 2,
-    title: 'Invite 5 Friends',
-    reward: 600,
-    Icon: Users,
-    href: '/referrals',
-  },
-  {
-    id: 3,
-    title: 'Follow us on X',
-    reward: 300,
-    Icon: XIcon,
-    href: '#',
-  },
-  {
-    id: 4,
-    title: 'Join Telegram Channel',
-    reward: 300,
-    Icon: Send,
-    href: '#',
-  },
-];
+const iconMap: Record<string, ElementType> = {
+  Clapperboard,
+  Users,
+  XIcon,
+  Send,
+};
+
+export async function getTasks(): Promise<Task[]> {
+  const { data, error } = await supabase.from('tasks').select('*');
+  if (error) {
+    console.error('Error fetching tasks:', error);
+    return [];
+  }
+  return data.map((t: any) => ({
+    ...t,
+    Icon: iconMap[t.icon] || Send,
+  }));
+}
 
 export type LeaderboardUser = {
   rank: number;
@@ -49,30 +38,52 @@ export type LeaderboardUser = {
   isCurrentUser?: boolean;
 };
 
-const sampleUsernames = ['cypher', 'vortex', 'nova', 'zenith', 'echo', 'pulse', 'triton', 'solaris', 'lyra', 'orion', 'ace', 'blaze', 'case', 'drake', 'ember', 'fang', 'gale', 'hawk', 'iris', 'jade'];
+export async function getLeaderboard(): Promise<LeaderboardUser[]> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('username, ribs')
+    .order('ribs', { ascending: false })
+    .limit(100);
 
-export const leaderboardData: LeaderboardUser[] = Array.from({ length: 100 }, (_, i) => {
-    const rank = i + 1;
-    const baseRibs = 12500000;
-    const ribs = baseRibs - (rank * 50000) - Math.floor(Math.random() * 40000);
-    const username = `${sampleUsernames[i % sampleUsernames.length]}${rank}`;
-    return {
-        rank,
-        username,
-        avatarSeed: username,
-        ribs,
-    };
-});
+  if (error) {
+    console.error('Error fetching leaderboard:', error);
+    return [];
+  }
 
-export const userProfile = {
-    username: 'You',
-    rank: 123,
-    joinDate: '15-07-2024',
-    totalRibs: 9800000,
-    totalReferrals: 12,
-    referralCode: 'ZENITHFARM123',
-    email: 'zenith@example.com'
-};
+  return data.map((u, i) => ({
+    rank: i + 1,
+    username: u.username || 'Anonymous',
+    avatarSeed: u.username || 'Anonymous',
+    ribs: u.ribs,
+  }));
+}
+
+export async function getUserProfile(telegramId: number) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', telegramId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching user profile:', error);
+  }
+  return data;
+}
+
+export async function syncUser(user: { id: number; username?: string; first_name?: string; last_name?: string }) {
+  const { data, error } = await supabase.from('users').upsert({
+    id: user.id,
+    username: user.username,
+    first_name: user.first_name,
+    last_name: user.last_name,
+  }, { onConflict: 'id' }).select().single();
+
+  if (error) {
+    console.error('Error syncing user:', error);
+  }
+  return data;
+}
 
 export type Upgrade = {
     id: string;
