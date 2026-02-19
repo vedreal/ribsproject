@@ -178,7 +178,18 @@ export default function FarmPage() {
         <div className="flex justify-between items-start mb-4">
           <div className="flex flex-col items-start gap-2 pt-8">
             <Button
-              onClick={() => setHasCheckedInToday(true)}
+              onClick={async () => {
+                if (!userId) return;
+                const res = await checkIn(userId);
+                if (res.success) {
+                    setCheckInCount(res.count || checkInCount + 1);
+                    setHasCheckedInToday(true);
+                    setBalance(prev => prev + 200);
+                    toast({ title: 'Checked in! +200 RIBS' });
+                } else {
+                    toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
+                }
+              }}
               disabled={hasCheckedInToday}
               className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto"
             >
@@ -246,22 +257,34 @@ export default function FarmPage() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-3">
             <div className="flex justify-between items-center text-left">
               <div>
                 <h2 className="font-headline text-2xl font-semibold">Faucet Claim :</h2>
                 <p className="text-sm text-muted-foreground">Rate : {faucetBenefit}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                {timeToClaim === 'Ready to Claim' ? (
+                {!isActivated ? (
                   <Button
-                    onClick={handleClaim}
+                    onClick={handleActivate}
+                    className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+                  >
+                    Activate
+                  </Button>
+                ) : timeToClaim === 'Ready to Claim' ? (
+                  <Button
+                    onClick={async () => {
+                      if (!userId) return;
+                      const nextClaimStr = await claimFaucet(userId, claimAmount);
+                      setBalance(prev => prev + claimAmount);
+                      setClaimTime(new Date(nextClaimStr).getTime());
+                      toast({ title: `Claimed ${claimAmount} RIBS!` });
+                    }}
                     className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
                   >
                     Claim
                   </Button>
                 ) : (
-                  <p className="text-3xl">{timeToClaim}</p>
+                  <p className="text-3xl font-mono tabular-nums">{timeToClaim}</p>
                 )}
                 <Button
                   onClick={() => setIsUpgradeSheetOpen(true)}
@@ -271,7 +294,6 @@ export default function FarmPage() {
                 </Button>
               </div>
             </div>
-          </div>
         </div>
 
         <UpgradeSheet

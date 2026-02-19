@@ -120,8 +120,10 @@ export default function SpinPage() {
     }
   };
 
-  const closeModal = () => {
-    if (result) {
+  const closeModal = async () => {
+    if (result && tgUser?.id) {
+        await saveSpinReward(tgUser.id, result);
+        
         if (result.includes('TON')) {
             const amount = parseFloat(result.split(' ')[0]);
             setTonBalance(prev => prev + amount);
@@ -146,6 +148,11 @@ export default function SpinPage() {
              toast({
                 title: 'Card Acquired!',
                 description: 'A new Mythic Card has been added to your collection.'
+            });
+        } else if (result.includes('RIBS')) {
+            toast({
+                title: 'Reward Added!',
+                description: `${result} has been added to your balance.`
             });
         }
     }

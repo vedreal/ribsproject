@@ -92,7 +92,7 @@ function waitForTelegramWebApp(maxWaitMs = 5000): Promise<boolean> {
 async function syncUserToSupabase(
   tgUser: TelegramUser,
   retries = 3
-): Promise<boolean> {
+): Promise<any> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       console.log(`[Supabase] Sync attempt ${attempt} for user:`, tgUser.id);
@@ -105,11 +105,12 @@ async function syncUserToSupabase(
             username: tgUser.username || `user_${tgUser.id}`,
             first_name: tgUser.first_name || '',
             last_name: tgUser.last_name || '',
+            photo_url: (tgUser as any).photo_url || '',
             referral_code: `ref_${tgUser.id}`,
           },
           {
             onConflict: 'id',
-            ignoreDuplicates: false, // Selalu update data terbaru
+            ignoreDuplicates: false,
           }
         )
         .select()
@@ -117,31 +118,16 @@ async function syncUserToSupabase(
 
       if (error) {
         console.error(`[Supabase] Attempt ${attempt} error:`, error);
-
-        // Jika error RLS policy, tidak perlu retry
-        if (error.code === '42501') {
-          console.error(
-            '[Supabase] ❌ RLS Policy Error! Pastikan policy INSERT dan UPDATE sudah benar di Supabase Dashboard.'
-          );
-          console.error(
-            '[Supabase] SQL yang diperlukan:\n' +
-            'CREATE POLICY "Allow anon insert" ON users FOR INSERT TO anon WITH CHECK (true);\n' +
-            'CREATE POLICY "Allow anon update" ON users FOR UPDATE TO anon USING (true) WITH CHECK (true);\n' +
-            'CREATE POLICY "Allow anon select" ON users FOR SELECT TO anon USING (true);'
-          );
-          return false;
-        }
-
-        // Untuk error lain, tunggu sebentar lalu retry
+        if (error.code === '42501') return null;
         if (attempt < retries) {
           await new Promise((r) => setTimeout(r, attempt * 500));
           continue;
         }
-        return false;
+        return null;
       }
 
       console.log('[Supabase] ✅ User synced successfully:', data);
-      return true;
+      return data;
     } catch (e) {
       console.error(`[Supabase] Attempt ${attempt} exception:`, e);
       if (attempt < retries) {
@@ -149,7 +135,7 @@ async function syncUserToSupabase(
       }
     }
   }
-  return false;
+  return null;
 }
 
 // ============================================================
@@ -201,9 +187,9 @@ export function TelegramProvider({ children }: PropsWithChildren) {
       setUser(tgUser);
 
       // 4. Sync ke Supabase
-      const synced = await syncUserToSupabase(tgUser);
+      const syncedData = await syncUserToSupabase(tgUser);
       if (!cancelled) {
-        setIsSynced(synced);
+        setIsSynced(!!syncedData);
         setIsLoading(false);
       }
     }
