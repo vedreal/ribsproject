@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppLayout } from '@/components/ribs/app-layout';
-import { userProfile } from '@/lib/data';
+import { getUserProfile } from '@/lib/data';
 import { Calendar, Users, HelpCircle } from 'lucide-react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 
@@ -19,7 +20,19 @@ function StatCard({ icon: Icon, title, value }: { icon: React.ElementType, title
 }
 
 export default function ProfilePage() {
-    const [email, setEmail] = useState(userProfile.email || '');
+    const [user, setUser] = useState<any>(null);
+    const [email, setEmail] = useState('');
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
+                const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+                const profile = await getUserProfile(tgUser.id);
+                if (profile) setUser(profile);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const getUserTitle = (balance: number): string => {
       if (balance >= 300000) return 'Legend';
@@ -30,30 +43,31 @@ export default function ProfilePage() {
       return 'Beginner';
     };
 
-    const userTitle = getUserTitle(userProfile.totalRibs);
+    const balance = user?.ribs || 0;
+    const userTitle = getUserTitle(balance);
+    const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
 
   return (
     <AppLayout>
       <div className="space-y-8">
         <header className="flex flex-col items-center text-center space-y-4">
           <Image
-            src="https://picsum.photos/seed/you/100/100"
-            alt={userProfile.username}
+            src={`https://picsum.photos/seed/${user?.username || 'user'}/100/100`}
+            alt={user?.username || 'User'}
             width={100}
             height={100}
             className="rounded-full border-4 border-primary"
-            data-ai-hint="avatar"
           />
           <div>
-            <h1 className="text-3xl font-headline font-bold">{userProfile.username}</h1>
+            <h1 className="text-3xl font-headline font-bold">{user?.username || 'User'}</h1>
             <p className="text-muted-foreground">You are {userTitle}</p>
           </div>
         </header>
 
         <div className="grid grid-cols-2 gap-4">
-            <StatCard icon={RibsIcon} title="Total RIBS" value={userProfile.totalRibs.toLocaleString('en-US')} />
-            <StatCard icon={Users} title="Total Referrals" value={userProfile.totalReferrals} />
-            <StatCard icon={Calendar} title="Join Date" value={userProfile.joinDate} />
+            <StatCard icon={RibsIcon} title="Total RIBS" value={balance.toLocaleString('en-US')} />
+            <StatCard icon={Users} title="Total Referrals" value={0} />
+            <StatCard icon={Calendar} title="Join Date" value={joinDate} />
             <StatCard icon={HelpCircle} title="Airdrop Status" value="Soon" />
         </div>
 

@@ -30,15 +30,7 @@ export async function getTasks(): Promise<Task[]> {
   }));
 }
 
-export type LeaderboardUser = {
-  rank: number;
-  username: string;
-  avatarSeed: string;
-  ribs: number;
-  isCurrentUser?: boolean;
-};
-
-export async function getLeaderboard(): Promise<LeaderboardUser[]> {
+export async function getLeaderboard() {
   const { data, error } = await supabase
     .from('users')
     .select('username, ribs')
@@ -77,12 +69,28 @@ export async function syncUser(user: { id: number; username?: string; first_name
     username: user.username,
     first_name: user.first_name,
     last_name: user.last_name,
+    referral_code: `ref_${user.id}`
   }, { onConflict: 'id' }).select().single();
 
   if (error) {
     console.error('Error syncing user:', error);
   }
   return data;
+}
+
+export async function updateUserRibs(telegramId: number, amount: number) {
+    const { data, error } = await supabase.rpc('increment_ribs', { 
+        user_id: telegramId, 
+        amount: amount 
+    });
+    
+    if (error) {
+        // Fallback if RPC doesn't exist yet
+        const { data: user } = await supabase.from('users').select('ribs').eq('id', telegramId).single();
+        if (user) {
+            await supabase.from('users').update({ ribs: user.ribs + amount }).eq('id', telegramId);
+        }
+    }
 }
 
 export type Upgrade = {
@@ -104,16 +112,9 @@ export const upgrades: Upgrade[] = [
         maxLevel: 10,
         costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
         benefits: [
-            '+200 RIBS/2hr',
-            '+250 RIBS/2hr',
-            '+300 RIBS/2hr',
-            '+350 RIBS/2hr',
-            '+400 RIBS/2hr',
-            '+450 RIBS/2hr',
-            '+500 RIBS/2hr',
-            '+550 RIBS/2hr',
-            '+600 RIBS/2hr',
-            '+650 RIBS/2hr'
+            '+200 RIBS/2hr', '+250 RIBS/2hr', '+300 RIBS/2hr', '+350 RIBS/2hr',
+            '+400 RIBS/2hr', '+450 RIBS/2hr', '+500 RIBS/2hr', '+550 RIBS/2hr',
+            '+600 RIBS/2hr', '+650 RIBS/2hr'
         ]
     },
     {
@@ -135,13 +136,3 @@ export const upgrades: Upgrade[] = [
         benefits: ['+1000 Taps', '+2000 Taps', '+3000 Taps']
     }
 ]
-
-// Mock data for build compatibility
-export const userProfile = {
-  rank: 101,
-  username: 'User',
-  totalRibs: 0,
-};
-
-export const leaderboardData = [];
-export const tasks = [];
