@@ -19,32 +19,32 @@ const iconMap: Record<string, ElementType> = {
 };
 
 export const tasks: Task[] = [
-    {
-        id: 1,
-        title: 'Join our Telegram Channel',
-        reward: 5000,
-        Icon: Send,
-        href: 'https://t.me/ribs_announcements'
-    },
-    {
-        id: 2,
-        title: 'Follow us on X',
-        reward: 3000,
-        Icon: XIcon,
-        href: 'https://x.com/ribs_project'
-    }
+  {
+    id: 1,
+    title: 'Join our Telegram Channel',
+    reward: 5000,
+    Icon: Send,
+    href: 'https://t.me/ribs_announcements'
+  },
+  {
+    id: 2,
+    title: 'Follow us on X',
+    reward: 3000,
+    Icon: XIcon,
+    href: 'https://x.com/ribs_project'
+  }
 ];
 
 export const leaderboardData = [
-    { rank: 1, username: 'RibsMaster', avatarSeed: '1', ribs: 1000000 },
-    { rank: 2, username: 'TappingPro', avatarSeed: '2', ribs: 850000 },
+  { rank: 1, username: 'RibsMaster', avatarSeed: '1', ribs: 1000000 },
+  { rank: 2, username: 'TappingPro', avatarSeed: '2', ribs: 850000 },
 ];
 
 export const userProfile = {
-    rank: 150,
-    username: 'Player123',
-    referralCode: 'REF123',
-    totalRibs: 12500,
+  rank: 150,
+  username: 'Player123',
+  referralCode: 'REF123',
+  totalRibs: 12500,
 };
 
 export async function getTasks(): Promise<Task[]> {
@@ -92,7 +92,12 @@ export async function getUserProfile(telegramId: number) {
   return data;
 }
 
-export async function syncUser(user: { id: number; username?: string; first_name?: string; last_name?: string }) {
+export async function syncUser(user: {
+  id: number;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+}) {
   try {
     const { data, error } = await supabase.from('users').upsert({
       id: user.id,
@@ -113,109 +118,151 @@ export async function syncUser(user: { id: number; username?: string; first_name
 }
 
 export async function checkIn(telegramId: number) {
-  const { data: user } = await supabase.from('users').select('last_checkin, checkin_count').eq('id', telegramId).single();
-  if (!user) return { success: false, message: 'User not found' };
+  const { data: user, error: fetchError } = await supabase
+    .from('users')
+    .select('last_checkin, checkin_count, ribs')
+    .eq('id', telegramId)
+    .single();
+
+  if (fetchError || !user) return { success: false, message: 'User not found' };
 
   const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
-  
+  const todayDate = now.toISOString().split('T')[0];
+
   if (user.last_checkin) {
     const lastDate = new Date(user.last_checkin).toISOString().split('T')[0];
-    const todayDate = today.split('T')[0];
     if (lastDate === todayDate) {
       return { success: false, message: 'Already checked in today' };
     }
   }
 
   const newCount = (user.checkin_count || 0) + 1;
+  const newRibs = (user.ribs || 0) + 200;
+
   const { error } = await supabase.from('users').update({
-    last_checkin: today,
+    last_checkin: now.toISOString(),
     checkin_count: newCount,
-    ribs: (user.ribs || 0) + 200
+    ribs: newRibs,
   }).eq('id', telegramId);
 
   if (error) return { success: false, message: error.message };
   return { success: true, count: newCount };
 }
 
-export async function claimFaucet(telegramId: number, amount: number) {
+export async function claimFaucet(telegramId: number, amount: number): Promise<string> {
   const nextClaim = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
-  const { error } = await supabase.from('users').update({
-    next_faucet_claim: nextClaim,
-    ribs: supabase.rpc('increment_ribs', { user_id: telegramId, amount })
-  }).eq('id', telegramId);
-  
-  if (error) {
-     // Fallback if RPC fails
-     const { data: user } = await supabase.from('users').select('ribs').eq('id', telegramId).single();
-     await supabase.from('users').update({ 
-       ribs: (user?.ribs || 0) + amount,
-       next_faucet_claim: nextClaim 
-     }).eq('id', telegramId);
+
+  // Ambil ribs saat ini dulu
+  const { data: user, error: fetchError } = await supabase
+    .from('users')
+    .select('ribs')
+    .eq('id', telegramId)
+    .single();
+
+  if (fetchError || !user) {
+    throw new Error('User not found');
   }
+
+  const newRibs = (user.ribs || 0) + amount;
+
+  const { error } = await supabase.from('users').update({
+    ribs: newRibs,
+    next_faucet_claim: nextClaim,
+  }).eq('id', telegramId);
+
+  if (error) {
+    console.error('claimFaucet error:', error);
+    throw new Error(error.message);
+  }
+
   return nextClaim;
 }
 
 export async function saveSpinReward(telegramId: number, reward: string) {
-  const { data: user } = await supabase.from('users').select('*').eq('id', telegramId).single();
-  if (!user) return;
+  // Ambil data user terkini dari Supabase
+  const { data: user, error: fetchError } = await supabase
+    .from('users')
+    .select('ribs, ton_balance, rare_cards, epic_cards, mythic_cards')
+    .eq('id', telegramId)
+    .single();
 
-  const update: any = { ribs: user.ribs || 0 };
+  if (fetchError || !user) {
+    console.error('saveSpinReward: user not found', fetchError);
+    return;
+  }
+
+  const update: Record<string, any> = {};
+
   if (reward.includes('TON')) {
-    update.ton_balance = (user.ton_balance || 0) + parseFloat(reward.split(' ')[0]);
+    const amount = parseFloat(reward.split(' ')[0]);
+    update.ton_balance = (user.ton_balance || 0) + amount;
   } else if (reward.includes('RIBS')) {
-    update.ribs += parseInt(reward.split(' ')[0]);
+    const amount = parseInt(reward.split(' ')[0]);
+    update.ribs = (user.ribs || 0) + amount;
   } else if (reward === 'Rare Card') {
     update.rare_cards = (user.rare_cards || 0) + 1;
   } else if (reward === 'Epic Card') {
     update.epic_cards = (user.epic_cards || 0) + 1;
   } else if (reward === 'Mythic Card') {
     update.mythic_cards = (user.mythic_cards || 0) + 1;
+  } else if (reward === 'Try Again!') {
+    // Tidak ada perubahan, return langsung
+    return;
   }
 
-  await supabase.from('users').update(update).eq('id', telegramId);
+  if (Object.keys(update).length > 0) {
+    const { error } = await supabase
+      .from('users')
+      .update(update)
+      .eq('id', telegramId);
+
+    if (error) {
+      console.error('saveSpinReward update error:', error);
+      throw new Error(error.message);
+    }
+  }
 }
 
 export type Upgrade = {
-    id: string;
-    name: string;
-    description: string;
-    level: number;
-    maxLevel: number;
-    costs: number[];
-    benefits: string[];
-}
+  id: string;
+  name: string;
+  description: string;
+  level: number;
+  maxLevel: number;
+  costs: number[];
+  benefits: string[];
+};
 
 export const upgrades: Upgrade[] = [
-    {
-        id: 'faucet-rate',
-        name: 'Faucet Rate',
-        description: 'Increase the amount of RIBS you earn from the faucet.',
-        level: 1,
-        maxLevel: 10,
-        costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
-        benefits: [
-            '+200 RIBS/2hr', '+250 RIBS/2hr', '+300 RIBS/2hr', '+350 RIBS/2hr',
-            '+400 RIBS/2hr', '+450 RIBS/2hr', '+500 RIBS/2hr', '+550 RIBS/2hr',
-            '+600 RIBS/2hr', '+650 RIBS/2hr'
-        ]
-    },
-    {
-        id: 'tap-power',
-        name: 'Tap Power',
-        description: 'Increase the amount of RIBS you earn per tap.',
-        level: 1,
-        maxLevel: 3,
-        costs: [3000, 6000],
-        benefits: ['+1 RIBS/tap', '+2 RIBS/tap', '+5 RIBS/tap']
-    },
-    {
-        id: 'tap-energy',
-        name: 'Tap Energy',
-        description: 'Increase your maximum daily tap limit.',
-        level: 1,
-        maxLevel: 3,
-        costs: [5000, 10000],
-        benefits: ['+1000 Taps', '+2000 Taps', '+3000 Taps']
-    }
-]
+  {
+    id: 'faucet-rate',
+    name: 'Faucet Rate',
+    description: 'Increase the amount of RIBS you earn from the faucet.',
+    level: 1,
+    maxLevel: 10,
+    costs: [2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500],
+    benefits: [
+      '+200 RIBS/2hr', '+250 RIBS/2hr', '+300 RIBS/2hr', '+350 RIBS/2hr',
+      '+400 RIBS/2hr', '+450 RIBS/2hr', '+500 RIBS/2hr', '+550 RIBS/2hr',
+      '+600 RIBS/2hr', '+650 RIBS/2hr'
+    ]
+  },
+  {
+    id: 'tap-power',
+    name: 'Tap Power',
+    description: 'Increase the amount of RIBS you earn per tap.',
+    level: 1,
+    maxLevel: 3,
+    costs: [3000, 6000],
+    benefits: ['+1 RIBS/tap', '+2 RIBS/tap', '+5 RIBS/tap']
+  },
+  {
+    id: 'tap-energy',
+    name: 'Tap Energy',
+    description: 'Increase your maximum daily tap limit.',
+    level: 1,
+    maxLevel: 3,
+    costs: [5000, 10000],
+    benefits: ['+1000 Taps', '+2000 Taps', '+3000 Taps']
+  }
+];
