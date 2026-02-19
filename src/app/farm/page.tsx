@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -11,7 +11,8 @@ import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
 import { upgrades as initialUpgrades, type Upgrade, getUserProfile, checkIn, claimFaucet } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { useTelegram } from '@/components/telegram-provider'; // ✅ Import context
+import { useTelegram } from '@/components/telegram-provider';
+import { supabase } from '@/lib/supabase';
 
 const CLAIM_DURATION_MS = 2 * 60 * 60 * 1000;
 
@@ -24,25 +25,29 @@ export default function FarmPage() {
   const [floatingNumbers, setFloatingNumbers] = useState<{ id: number; x: number; y: number }[]>([]);
   const [checkInCount, setCheckInCount] = useState(1);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
   const [upgrades, setUpgrades] = useState<Upgrade[]>(initialUpgrades);
 
-  // ✅ Gunakan context, bukan akses window.Telegram langsung
   const { user: tgUser, isLoading } = useTelegram();
   const userId = tgUser?.id ?? null;
 
   const [isActivated, setIsActivated] = useState(false);
 
-  // ✅ Load user data dari Supabase saat userId tersedia
+  // Buffer tap untuk batch save ke supabase
+  const tapBufferRef = useRef(0);
+  const tapSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ── Load user data dari Supabase ──────────────────────────
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isLoading) return;
 
     const fetchUserData = async () => {
       const profile = await getUserProfile(userId);
       if (profile) {
         setBalance(profile.ribs ?? 0);
         setCheckInCount(profile.checkin_count ?? 0);
-        
+
         if (profile.last_checkin) {
           const lastDate = new Date(profile.last_checkin).toISOString().split('T')[0];
           const todayDate = new Date().toISOString().split('T')[0];
@@ -51,30 +56,42 @@ export default function FarmPage() {
 
         if (profile.next_faucet_claim) {
           const nextClaim = new Date(profile.next_faucet_claim).getTime();
-          setClaimTime(nextClaim);
-          setIsActivated(true);
+          // Hanya set jika masih di masa depan
+          if (nextClaim > Date.now()) {
+            setClaimTime(nextClaim);
+            setIsActivated(true);
+          } else {
+            // Faucet sudah bisa di-claim (waktu sudah lewat)
+            setClaimTime(Date.now()); // trigger "Ready to Claim"
+            setIsActivated(true);
+          }
         } else {
           setIsActivated(false);
           setClaimTime(null);
         }
       }
+      setIsLoaded(true);
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId, isLoading]);
 
-  const handleActivate = async () => {
-    if (!userId) return;
-    const nextClaim = Date.now() + CLAIM_DURATION_MS;
-    setClaimTime(nextClaim);
-    setIsActivated(true);
-    await supabase.from('users').update({ next_faucet_claim: new Date(nextClaim).toISOString() }).eq('id', userId);
-    toast({ title: 'Faucet Activated!' });
-  };
+  // ── Cleanup tap buffer saat unmount ──────────────────────
+  useEffect(() => {
+    return () => {
+      // Flush tap buffer saat komponen unmount
+      if (tapBufferRef.current > 0 && userId) {
+        supabase.rpc('increment_ribs', { user_id: userId, amount: tapBufferRef.current }).catch(console.error);
+      }
+      if (tapSaveTimerRef.current) {
+        clearTimeout(tapSaveTimerRef.current);
+      }
+    };
+  }, [userId]);
 
   // ── Upgrade computed values ──────────────────────────────
   const faucetUpgrade = upgrades.find(u => u.id === 'faucet-rate');
-  const faucetBenefit = faucetUpgrade ? faucetUpgrade.benefits[faucetUpgrade.level - 1] : '200';
+  const faucetBenefit = faucetUpgrade ? faucetUpgrade.benefits[faucetUpgrade.level - 1] : '+200 RIBS/2hr';
   const claimAmount = faucetUpgrade
     ? parseInt(faucetBenefit.match(/\d+/)?.[0] || '200')
     : 200;
@@ -104,11 +121,10 @@ export default function FarmPage() {
   useEffect(() => {
     if (claimTime === null) return;
 
-    const interval = setInterval(() => {
+    const update = () => {
       const diff = claimTime - Date.now();
       if (diff <= 0) {
         setTimeToClaim('Ready to Claim');
-        clearInterval(interval);
         return;
       }
       const h = Math.floor(diff / 3600000);
@@ -117,8 +133,10 @@ export default function FarmPage() {
       setTimeToClaim(
         `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
       );
-    }, 1000);
+    };
 
+    update(); // langsung update sekali
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, [claimTime]);
 
@@ -130,28 +148,65 @@ export default function FarmPage() {
     setBalance(newBalance);
     setTapsLeft(prev => prev - 1);
 
-    // ✅ Hanya update Supabase jika ada userId
-    if (userId) {
-      supabase.rpc('increment_ribs', { user_id: userId, amount: tapAmount }).catch(console.error);
+    // Tambah ke buffer
+    tapBufferRef.current += tapAmount;
+
+    // Reset timer, lalu save setelah 2 detik idle
+    if (tapSaveTimerRef.current) {
+      clearTimeout(tapSaveTimerRef.current);
     }
+    tapSaveTimerRef.current = setTimeout(async () => {
+      if (tapBufferRef.current > 0 && userId) {
+        const amountToSave = tapBufferRef.current;
+        tapBufferRef.current = 0;
+        try {
+          await supabase.rpc('increment_ribs', { user_id: userId, amount: amountToSave });
+        } catch (err) {
+          console.error('Failed to save taps:', err);
+        }
+      }
+    }, 2000);
 
     const rect = e.currentTarget.getBoundingClientRect();
     const newNum = { id: Date.now(), x: e.clientX - rect.left, y: e.clientY - rect.top };
     setFloatingNumbers(prev => [...prev, newNum]);
     setTimeout(() => {
-      setFloatingNumbers(curr => curr.filter(n => n.id !== num.id));
+      setFloatingNumbers(curr => curr.filter(n => n.id !== newNum.id));
     }, 1500);
+  };
+
+  const handleActivate = async () => {
+    if (!userId) return;
+    const nextClaim = Date.now() + CLAIM_DURATION_MS;
+    setClaimTime(nextClaim);
+    setIsActivated(true);
+    const { error } = await supabase
+      .from('users')
+      .update({ next_faucet_claim: new Date(nextClaim).toISOString() })
+      .eq('id', userId);
+    if (error) {
+      console.error('Failed to activate faucet:', error);
+      toast({ title: 'Gagal mengaktifkan faucet', variant: 'destructive' });
+    } else {
+      toast({ title: 'Faucet Activated! ✅' });
+    }
   };
 
   const handleClaim = async () => {
     if (!userId) return;
-    const nextClaimStr = await claimFaucet(userId, claimAmount);
-    setBalance(prev => prev + claimAmount);
-    setClaimTime(new Date(nextClaimStr).getTime());
-    toast({ title: `Claimed ${claimAmount} RIBS!` });
+    try {
+      const nextClaimStr = await claimFaucet(userId, claimAmount);
+      setBalance(prev => prev + claimAmount);
+      setClaimTime(new Date(nextClaimStr).getTime());
+      toast({ title: `✅ Claimed ${claimAmount} RIBS!` });
+    } catch (err) {
+      console.error('Claim failed:', err);
+      toast({ title: 'Claim gagal, coba lagi', variant: 'destructive' });
+    }
   };
 
-  const handleUpgrade = (upgradeId: string) => {
+  const handleUpgrade = async (upgradeId: string) => {
+    if (!userId) return;
     const idx = upgrades.findIndex(u => u.id === upgradeId);
     if (idx === -1) return;
 
@@ -163,15 +218,22 @@ export default function FarmPage() {
       return;
     }
 
+    // Optimistic update
     setBalance(prev => prev - cost);
-    if (userId) {
-        supabase.rpc('increment_ribs', { user_id: userId, amount: -cost }).catch(console.error);
-    }
-
     const newUpgrades = [...upgrades];
     newUpgrades[idx] = { ...newUpgrades[idx], level: newUpgrades[idx].level + 1 };
     setUpgrades(newUpgrades);
-    toast({ title: `Upgraded ${upgrade.name}!` });
+
+    // Save ke Supabase
+    try {
+      await supabase.rpc('increment_ribs', { user_id: userId, amount: -cost });
+      toast({ title: `✅ Upgraded ${upgrade.name}!` });
+    } catch (err) {
+      // Rollback jika gagal
+      setBalance(prev => prev + cost);
+      setUpgrades(upgrades);
+      toast({ title: 'Upgrade gagal', variant: 'destructive' });
+    }
   };
 
   // ── Render ───────────────────────────────────────────────
@@ -185,15 +247,15 @@ export default function FarmPage() {
                 if (!userId) return;
                 const res = await checkIn(userId);
                 if (res.success) {
-                    setCheckInCount(res.count || checkInCount + 1);
-                    setHasCheckedInToday(true);
-                    setBalance(prev => prev + 200);
-                    toast({ title: 'Checked in! +200 RIBS' });
+                  setCheckInCount(res.count || checkInCount + 1);
+                  setHasCheckedInToday(true);
+                  setBalance(prev => prev + 200);
+                  toast({ title: '✅ Checked in! +200 RIBS' });
                 } else {
-                    toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
+                  toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
                 }
               }}
-              disabled={hasCheckedInToday}
+              disabled={hasCheckedInToday || !isLoaded}
               className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto"
             >
               <CalendarCheck className="mr-2 h-4 w-4" /> Check-in: {checkInCount}x
@@ -226,7 +288,6 @@ export default function FarmPage() {
               <RibsIcon className="w-5 h-5" />
               {tgUser ? `@${tgUser.username || tgUser.first_name || 'User'}'s RIBS` : 'Your RIBS Balance'}
             </p>
-            {/* ✅ Debug indicator - hapus setelah production stabil */}
             {process.env.NODE_ENV === 'development' && (
               <p className="text-xs text-muted-foreground mt-1">
                 UserID: {userId ?? 'Not detected'} | Loaded: {!isLoading ? '✅' : '⏳'}
@@ -260,43 +321,38 @@ export default function FarmPage() {
             </div>
           </div>
 
-            <div className="flex justify-between items-center text-left">
-              <div>
-                <h2 className="font-headline text-2xl font-semibold">Faucet Claim :</h2>
-                <p className="text-sm text-muted-foreground">Rate : {faucetBenefit}</p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                {!isActivated ? (
-                  <Button
-                    onClick={handleActivate}
-                    className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
-                  >
-                    Activate
-                  </Button>
-                ) : timeToClaim === 'Ready to Claim' ? (
-                  <Button
-                    onClick={async () => {
-                      if (!userId) return;
-                      const nextClaimStr = await claimFaucet(userId, claimAmount);
-                      setBalance(prev => prev + claimAmount);
-                      setClaimTime(new Date(nextClaimStr).getTime());
-                      toast({ title: `Claimed ${claimAmount} RIBS!` });
-                    }}
-                    className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
-                  >
-                    Claim
-                  </Button>
-                ) : (
-                  <p className="text-3xl font-mono tabular-nums">{timeToClaim}</p>
-                )}
+          <div className="flex justify-between items-center text-left">
+            <div>
+              <h2 className="font-headline text-2xl font-semibold">Faucet Claim :</h2>
+              <p className="text-sm text-muted-foreground">Rate : {faucetBenefit}</p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              {!isActivated ? (
                 <Button
-                  onClick={() => setIsUpgradeSheetOpen(true)}
+                  onClick={handleActivate}
+                  disabled={!isLoaded || !userId}
                   className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
                 >
-                  <ArrowUpCircle className="mr-2 h-4 w-4" /> Upgrade
+                  Activate
                 </Button>
-              </div>
+              ) : timeToClaim === 'Ready to Claim' ? (
+                <Button
+                  onClick={handleClaim}
+                  className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+                >
+                  Claim
+                </Button>
+              ) : (
+                <p className="text-3xl font-mono tabular-nums">{timeToClaim}</p>
+              )}
+              <Button
+                onClick={() => setIsUpgradeSheetOpen(true)}
+                className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+              >
+                <ArrowUpCircle className="mr-2 h-4 w-4" /> Upgrade
+              </Button>
             </div>
+          </div>
         </div>
 
         <UpgradeSheet
