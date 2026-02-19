@@ -1,8 +1,27 @@
 'use client';
 
-import { AppRoot } from '@telegram-apps/sdk-react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+
+// Declare global Telegram interface for TypeScript
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        initDataUnsafe?: {
+          user?: {
+            id: number;
+            username?: string;
+            first_name?: string;
+            last_name?: string;
+          };
+        };
+        ready: () => void;
+        expand: () => void;
+      };
+    };
+  }
+}
 
 function UserSync({ children }: PropsWithChildren) {
   const [synced, setSynced] = useState(false);
@@ -37,7 +56,9 @@ function UserSync({ children }: PropsWithChildren) {
       }
     }
 
-    syncUser();
+    // Give some time for Telegram WebApp to initialize
+    const timer = setTimeout(syncUser, 1000);
+    return () => clearTimeout(timer);
   }, [synced]);
 
   return <>{children}</>;
@@ -48,16 +69,22 @@ function AppInitializer({ children }: PropsWithChildren) {
 
   useEffect(() => {
     setIsClient(true);
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      try {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      } catch (e) {
+        console.error('Error initializing Telegram WebApp:', e);
+      }
+    }
   }, []);
 
   if (!isClient) return null;
 
   return (
-    <AppRoot>
-      <UserSync>
-        {children}
-      </UserSync>
-    </AppRoot>
+    <UserSync>
+      {children}
+    </UserSync>
   );
 }
 
