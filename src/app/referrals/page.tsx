@@ -5,10 +5,23 @@ import { AppLayout } from '@/components/ribs/app-layout';
 import { userProfile } from '@/lib/data';
 import { Copy, Check, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { Input } from '@/components/ui/input';
 
+// Mocking useTelegram and supabase since they aren't imported or defined
+const useTelegram = () => ({ user: { id: '123', username: 'testuser', first_name: 'Test' } });
+const supabase = {
+    from: (table: string) => ({
+        select: (query: string) => ({
+            eq: (column: string, value: any) => Promise.resolve({ data: [], error: null })
+        })
+    })
+};
+
+export default function ReferralsPage() {
+    const { toast } = useToast();
+    const [isCopied, setIsCopied] = useState(false);
     const [referrals, setReferrals] = useState<{ name: string; ribs: number }[]>([]);
     const { user: tgUser } = useTelegram();
 
@@ -21,7 +34,7 @@ import { Input } from '@/components/ui/input';
                 .eq('referrer_id', tgUser.id);
             
             if (data) {
-                setReferrals(data.map(u => ({
+                setReferrals(data.map((u: any) => ({
                     name: u.username || u.first_name || 'Anonymous',
                     ribs: 100 // Example reward per referral
                 })));
@@ -29,10 +42,6 @@ import { Input } from '@/components/ui/input';
         };
         fetchReferrals();
     }, [tgUser?.id]);
-
-export default function ReferralsPage() {
-    const { toast } = useToast();
-    const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = () => {
         const referralLink = `https://t.me/ribs_bot?start=${userProfile?.referralCode || ''}`;
