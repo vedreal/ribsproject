@@ -16,7 +16,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark text-lg">
       <head>
-        <script src="https://telegram.org/js/telegram-web-app.js" async />
+        {/*
+          ⚠️  PENTING: Hapus "async" dari script Telegram!
+          Dengan "async", script bisa belum selesai load saat React hydrate,
+          menyebabkan window.Telegram undefined.
+          
+          Gunakan "defer" agar script load setelah HTML parse tapi sebelum
+          DOMContentLoaded — lebih aman untuk timing WebApp.init().
+        */}
+        <script src="https://telegram.org/js/telegram-web-app.js" defer />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
