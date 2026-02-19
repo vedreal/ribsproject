@@ -9,7 +9,7 @@ import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
-import { upgrades as initialUpgrades, type Upgrade, getUserProfile, updateUserRibs } from '@/lib/data';
+import { upgrades as initialUpgrades, type Upgrade, getUserProfile, checkIn, claimFaucet } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useTelegram } from '@/components/telegram-provider'; // ✅ Import context
 
@@ -132,21 +132,22 @@ export default function FarmPage() {
 
     // ✅ Hanya update Supabase jika ada userId
     if (userId) {
-      updateUserRibs(userId, tapAmount).catch(console.error);
+      supabase.rpc('increment_ribs', { user_id: userId, amount: tapAmount }).catch(console.error);
     }
 
     const rect = e.currentTarget.getBoundingClientRect();
     const newNum = { id: Date.now(), x: e.clientX - rect.left, y: e.clientY - rect.top };
     setFloatingNumbers(prev => [...prev, newNum]);
     setTimeout(() => {
-      setFloatingNumbers(curr => curr.filter(n => n.id !== newNum.id));
+      setFloatingNumbers(curr => curr.filter(n => n.id !== num.id));
     }, 1500);
   };
 
   const handleClaim = async () => {
+    if (!userId) return;
+    const nextClaimStr = await claimFaucet(userId, claimAmount);
     setBalance(prev => prev + claimAmount);
-    setClaimTime(Date.now() + CLAIM_DURATION_MS);
-    if (userId) await updateUserRibs(userId, claimAmount);
+    setClaimTime(new Date(nextClaimStr).getTime());
     toast({ title: `Claimed ${claimAmount} RIBS!` });
   };
 
@@ -163,7 +164,9 @@ export default function FarmPage() {
     }
 
     setBalance(prev => prev - cost);
-    if (userId) updateUserRibs(userId, -cost).catch(console.error);
+    if (userId) {
+        supabase.rpc('increment_ribs', { user_id: userId, amount: -cost }).catch(console.error);
+    }
 
     const newUpgrades = [...upgrades];
     newUpgrades[idx] = { ...newUpgrades[idx], level: newUpgrades[idx].level + 1 };
