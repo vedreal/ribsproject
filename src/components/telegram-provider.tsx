@@ -1,29 +1,19 @@
 'use client';
 
-import { SDKProvider, useLaunchParams, useMiniApp, useThemeParams, useViewport, bindMiniAppCSSVars, bindThemeParamsCSSVars, bindViewportCSSVars } from '@telegram-apps/sdk-react';
-import { useEffect, type PropsWithChildren } from 'react';
+import { SDKProvider, useLaunchParams } from '@telegram-apps/sdk-react';
+import { useEffect, type PropsWithChildren, useState } from 'react';
 import { syncUser } from '@/lib/data';
 
 function AppInitializer({ children }: PropsWithChildren) {
   const lp = useLaunchParams();
-  const miniApp = useMiniApp();
-  const themeParams = useThemeParams();
-  const viewport = useViewport();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    return bindMiniAppCSSVars(miniApp, themeParams);
-  }, [miniApp, themeParams]);
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
-    return bindThemeParamsCSSVars(themeParams);
-  }, [themeParams]);
-
-  useEffect(() => {
-    return viewport && bindViewportCSSVars(viewport);
-  }, [viewport]);
-
-  useEffect(() => {
-    if (lp.initData?.user) {
+    if (isClient && lp.initData?.user) {
       const { id, username, firstName, lastName } = lp.initData.user;
       syncUser({
         id,
@@ -32,7 +22,9 @@ function AppInitializer({ children }: PropsWithChildren) {
         last_name: lastName,
       });
     }
-  }, [lp]);
+  }, [lp, isClient]);
+
+  if (!isClient) return null;
 
   return <>{children}</>;
 }

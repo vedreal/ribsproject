@@ -135,3 +135,13 @@ export const upgrades: Upgrade[] = [
         benefits: ['+1000 Taps', '+2000 Taps', '+3000 Taps']
     }
 ]
+
+// Mock data for build compatibility
+export const userProfile = {
+  rank: 101,
+  username: 'User',
+  totalRibs: 0,
+};
+
+export const leaderboardData = [];
+export const tasks = [];
