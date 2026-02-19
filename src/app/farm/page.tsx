@@ -32,7 +32,21 @@ export default function FarmPage() {
         if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
             const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
             setUserId(tgUser.id);
-            const profile = await getUserProfile(tgUser.id);
+            
+            // Try to sync user here as well to be sure
+            const { data: syncedUser, error: syncError } = await supabase
+                .from('users')
+                .upsert({
+                    id: tgUser.id,
+                    username: tgUser.username || '',
+                    first_name: tgUser.first_name || '',
+                    last_name: tgUser.last_name || '',
+                    referral_code: `ref_${tgUser.id}`,
+                }, { onConflict: 'id' })
+                .select()
+                .single();
+
+            const profile = syncedUser || await getUserProfile(tgUser.id);
             if (profile) {
                 setBalance(profile.ribs);
             }

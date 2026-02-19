@@ -45,6 +45,12 @@ function UserSync({ children }: PropsWithChildren) {
 
           if (error) {
             console.error('Error syncing user to Supabase:', error);
+            // Try to fetch to see if it exists but upsert failed due to RLS/indexing
+            const { data: existingUser } = await supabase.from('users').select('id').eq('id', user.id).single();
+            if (existingUser) {
+              console.log('User already exists in Supabase');
+              setSynced(true);
+            }
           } else {
             console.log('User synced successfully');
             setSynced(true);

@@ -93,18 +93,23 @@ export async function getUserProfile(telegramId: number) {
 }
 
 export async function syncUser(user: { id: number; username?: string; first_name?: string; last_name?: string }) {
-  const { data, error } = await supabase.from('users').upsert({
-    id: user.id,
-    username: user.username,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    referral_code: `ref_${user.id}`
-  }, { onConflict: 'id' }).select().single();
+  try {
+    const { data, error } = await supabase.from('users').upsert({
+      id: user.id,
+      username: user.username || '',
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      referral_code: `ref_${user.id}`
+    }, { onConflict: 'id' }).select().single();
 
-  if (error) {
-    console.error('Error syncing user:', error);
+    if (error) {
+      console.error('Error syncing user:', error);
+    }
+    return data;
+  } catch (e) {
+    console.error('Exception in syncUser:', e);
+    return null;
   }
-  return data;
 }
 
 export async function updateUserRibs(telegramId: number, amount: number) {
