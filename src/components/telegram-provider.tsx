@@ -6,9 +6,9 @@ import { supabase } from '@/lib/supabase';
 // Declare global Telegram interface for TypeScript
 declare global {
   interface Window {
-    Telegram?: {
-      WebApp?: {
-        initDataUnsafe?: {
+    Telegram: {
+      WebApp: {
+        initDataUnsafe: {
           user?: {
             id: number;
             username?: string;
