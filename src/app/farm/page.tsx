@@ -300,10 +300,10 @@ export default function FarmPage() {
   // ── Render ────────────────────────────────────────────────
   return (
     <AppLayout>
-      <div className="relative">
+      <div className="relative overflow-hidden">
         {/* Top row */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex flex-col items-start gap-2 pt-8">
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex flex-col items-start gap-2">
             <Button
               onClick={async () => {
                 if (!userId) return;
@@ -330,7 +330,7 @@ export default function FarmPage() {
           </div>
 
           <div className={cn(
-            'text-xs font-bold px-3 py-1.5 rounded-full shadow-md mt-8',
+            'text-xs font-bold px-3 py-1.5 rounded-full shadow-md',
             balance >= 300000
               ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black'
               : 'bg-secondary'
@@ -339,18 +339,18 @@ export default function FarmPage() {
           </div>
         </div>
 
-        <div className="text-center space-y-8">
+        <div className="text-center space-y-4">
           {/* Balance */}
           <div>
+            <p className="text-muted-foreground flex items-center justify-center gap-2 mb-1 text-sm">
+              <RibsIcon className="w-4 h-4" />
+              {tgUser
+                ? `@${tgUser.username || tgUser.first_name || 'User'}'s RIBS`
+                : 'RIBS Balance'}
+            </p>
             <h1 className="font-headline text-5xl font-bold text-primary">
               {balance.toLocaleString('en-US')}
             </h1>
-            <p className="text-muted-foreground flex items-center justify-center gap-2">
-              <RibsIcon className="w-5 h-5" />
-              {tgUser
-                ? `@${tgUser.username || tgUser.first_name || 'User'}'s RIBS`
-                : 'Your RIBS Balance'}
-            </p>
           </div>
 
           {/* Tap button */}
