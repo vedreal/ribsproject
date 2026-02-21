@@ -1,104 +1,180 @@
 'use client';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+
+import { useState, useEffect, useRef } from 'react';
 import { AppLayout } from '@/components/ribs/app-layout';
-import { userProfile } from '@/lib/data';
-import { Copy, Check, Gift } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
-import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { useTelegram } from '@/components/telegram-provider';
+import { supabase } from '@/lib/supabase';
+import { getUserProfile } from '@/lib/data';
+import { Copy, Users } from 'lucide-react';
 
-// Mocking useTelegram and supabase since they aren't imported or defined
-const useTelegram = () => ({ user: { id: '123', username: 'testuser', first_name: 'Test' } });
-const supabase = {
-    from: (table: string) => ({
-        select: (query: string) => ({
-            eq: (column: string, value: any) => Promise.resolve({ data: [], error: null })
-        })
-    })
-};
+const RIBS_PER_REFERRAL = 100;
+const MINIAPP_BASE = 'https://t.me/ribscoin_bot/RIBS?startapp=';
 
-export default function ReferralsPage() {
-    const { toast } = useToast();
-    const [isCopied, setIsCopied] = useState(false);
-    const [referrals, setReferrals] = useState<{ name: string; ribs: number }[]>([]);
-    const { user: tgUser } = useTelegram();
+export default function RefsPage() {
+  const { user: tgUser, isLoading } = useTelegram();
+  const { toast } = useToast();
+  const userId = tgUser?.id ?? null;
 
-    useEffect(() => {
-        if (!tgUser?.id) return;
-        const fetchReferrals = async () => {
-            const { data, error } = await supabase
-                .from('users')
-                .select('username, first_name')
-                .eq('referrer_id', tgUser.id);
-            
-            if (data) {
-                setReferrals(data.map((u: any) => ({
-                    name: u.username || u.first_name || 'Anonymous',
-                    ribs: 100 // Example reward per referral
-                })));
+  const [referralCount,   setReferralCount]   = useState(0);
+  const [rewardedCount,   setRewardedCount]   = useState(0);
+  const [balance,         setBalance]         = useState(0);
+  const [referrals,       setReferrals]       = useState<{ username: string | null; first_name: string | null; ribs: number }[]>([]);
+  const [isLoaded,        setIsLoaded]        = useState(false);
+
+  const referralLink = userId ? `${MINIAPP_BASE}${userId}` : '';
+
+  // ── Load & check for new referrals to reward ───────────
+  useEffect(() => {
+    if (!userId || isLoading) return;
+
+    (async () => {
+      try {
+        const profile = await getUserProfile(userId);
+        if (!profile) { setIsLoaded(true); return; }
+
+        const currentBalance  = profile.ribs              ?? 0;
+        const currentRewarded = profile.referral_rewarded_count ?? 0;
+        setBalance(currentBalance);
+        setRewardedCount(currentRewarded);
+
+        // Fetch referrals
+        const { data: refs, count } = await supabase
+          .from('users')
+          .select('username, first_name, ribs', { count: 'exact' })
+          .eq('referred_by', userId)
+          .order('ribs', { ascending: false });
+
+        const totalRefs = count ?? 0;
+        setReferralCount(totalRefs);
+        setReferrals(refs ?? []);
+
+        // Auto-reward for new referrals not yet rewarded
+        const newRefs = totalRefs - currentRewarded;
+        if (newRefs > 0) {
+          const bonus = newRefs * RIBS_PER_REFERRAL;
+          const { error: ribsErr } = await supabase.rpc('increment_ribs', {
+            user_id: userId,
+            amount: bonus,
+          });
+          if (!ribsErr) {
+            const { error: updateErr } = await supabase.from('users').update({
+              referral_rewarded_count: totalRefs,
+            }).eq('id', userId);
+
+            if (!updateErr) {
+              setBalance(prev => prev + bonus);
+              setRewardedCount(totalRefs);
+              toast({
+                title: `🎉 +${bonus} RIBS earned!`,
+                description: `Reward for ${newRefs} new referral${newRefs > 1 ? 's' : ''}.`,
+              });
             }
-        };
-        fetchReferrals();
-    }, [tgUser?.id]);
+          }
+        }
 
-    const handleCopy = () => {
-        const referralLink = `https://t.me/ribs_bot?start=${userProfile?.referralCode || ''}`;
-        navigator.clipboard.writeText(referralLink);
-        setIsCopied(true);
-        toast({
-            title: 'Copied to clipboard!',
-            description: 'Your referral link is ready to be shared.',
-        });
-        setTimeout(() => setIsCopied(false), 2000);
-    };
+        setIsLoaded(true);
+      } catch (e) {
+        console.error('RefsPage load error:', e);
+        setIsLoaded(true);
+      }
+    })();
+  }, [userId, isLoading]);
+
+  const copyLink = () => {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink).then(() => {
+      toast({ title: 'Referral link copied!' });
+    });
+  };
+
+  const shareLink = () => {
+    if (!referralLink) return;
+    const text = encodeURIComponent(`Join me on RIBS and start earning! ${referralLink}`);
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`, '_blank');
+  };
 
   return (
     <AppLayout>
-      <div className="space-y-8">
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-headline font-bold">Referrals</h1>
-          <p className="text-muted-foreground">Invite friends and earn a percentage of their farm.</p>
-        </header>
-
-        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6 space-y-2">
-            <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Invite Link</h2>
-            <p className="text-sm text-muted-foreground">Share this link with your friends. You'll get bonus RIBS when they join and play.</p>
-            <div className="flex items-center gap-2 pt-2">
-                <Input type="text" readOnly value={`https://t.me/ribs_bot?start=${userProfile?.referralCode || ''}`} />
-                <Button size="icon" onClick={handleCopy} className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold hover:brightness-95">
-                    {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-            </div>
+      <div className="space-y-5">
+        <div className="text-center">
+          <h1 className="text-3xl font-headline font-bold">Referrals</h1>
+          <p className="text-muted-foreground text-sm">Earn {RIBS_PER_REFERRAL} RIBS for every friend you invite</p>
         </div>
 
-        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-6">
-            <div className="space-y-1.5 mb-6">
-                <h2 className="font-headline text-2xl font-semibold leading-none tracking-tight">Your Referrals ({referrals.length})</h2>
-                <p className="text-sm text-muted-foreground">Users who joined using your link.</p>
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-4 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Friends Invited</span>
             </div>
-            <ul className="space-y-3">
-                {referrals.map((ref, index) => (
-                    <li key={index} className="flex items-center justify-between bg-gradient-to-br from-card to-background border border-border p-3 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <Image
-                            src={`https://picsum.photos/seed/${ref.name}/40/40`}
-                            alt={ref.name}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
-                            data-ai-hint="avatar"
-                            />
-                            <span className="font-medium">{ref.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2 font-semibold text-primary">
-                            <Gift className="w-4 h-4" /> +{ref.ribs.toLocaleString('en-US')}
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            <p className="text-3xl font-bold">{referralCount}</p>
+          </div>
+          <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-4 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <RibsIcon className="w-4 h-4" />
+              <span className="text-xs text-muted-foreground">RIBS Earned</span>
+            </div>
+            <p className="text-3xl font-bold">{(rewardedCount * RIBS_PER_REFERRAL).toLocaleString()}</p>
+          </div>
         </div>
+
+        {/* Referral link */}
+        <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-4 space-y-3">
+          <p className="text-sm font-semibold">Your Referral Link</p>
+          <div className="bg-background rounded-lg px-3 py-2 text-xs text-muted-foreground break-all font-mono">
+            {referralLink || 'Loading...'}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={copyLink}
+              disabled={!isLoaded || !referralLink}
+              className="flex-1 bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+            >
+              <Copy className="mr-2 h-4 w-4" /> Copy Link
+            </Button>
+            <Button
+              onClick={shareLink}
+              disabled={!isLoaded || !referralLink}
+              className="flex-1 bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold"
+            >
+              Share
+            </Button>
+          </div>
+        </div>
+
+        {/* Friends list */}
+        {referrals.length > 0 && (
+          <div className="rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-4 space-y-1">
+            <p className="text-sm font-semibold mb-3">Your Friends</p>
+            {referrals.map((ref, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
+                    {(ref.username || ref.first_name || '?')[0].toUpperCase()}
+                  </div>
+                  <span className="text-sm">
+                    {ref.username ? `@${ref.username}` : (ref.first_name || 'Unknown')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <RibsIcon className="w-3 h-3" />
+                  {(ref.ribs ?? 0).toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {isLoaded && referrals.length === 0 && (
+          <div className="text-center text-muted-foreground py-8 space-y-2">
+            <Users className="w-12 h-12 mx-auto opacity-30" />
+            <p className="text-sm">No referrals yet. Share your link to start earning!</p>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
