@@ -180,11 +180,11 @@ export default function SpinPage() {
   const handleSpin = (isAdSpin: boolean) => {
     if (isSpinning || !isLoaded) return;
     if (isAdSpin) {
-      if (adSpins <= 0) { toast({ title: 'No ad spins left!', description: 'Kembali besok.' }); return; }
+      if (adSpins <= 0) { toast({ title: 'No ad spins left!', description: 'Come back tomorrow.' }); return; }
       toast({ title: '📺 Watching Ad...', description: 'Spinning shortly...' });
       setTimeout(() => doSpin(true), 2000);
     } else {
-      if (freeSpins <= 0) { toast({ title: 'No free spins left!', description: 'Kembali besok.' }); return; }
+      if (freeSpins <= 0) { toast({ title: 'No free spins left!', description: 'Come back tomorrow.' }); return; }
       doSpin(false);
     }
   };
@@ -201,23 +201,23 @@ export default function SpinPage() {
         if (result.includes('TON')) {
           const amt = parseFloat(result.split(' ')[0]);
           setTonBalance(p => p + amt);
-          toast({ title: '🎉 TON Added!', description: `+${amt} TON disimpan.` });
+          toast({ title: '🎉 TON Added!', description: `+${amt} TON saved to your balance.` });
         } else if (result.includes('RIBS')) {
           const amt = parseInt(result.split(' ')[0]);
           setRibsBalance(p => p + amt);
-          toast({ title: '🎉 RIBS Added!', description: `+${amt} RIBS disimpan.` });
+          toast({ title: '🎉 RIBS Added!', description: `+${amt} RIBS saved.` });
         } else if (result === 'Rare Card') {
           setRareCards(p => p + 1);
-          toast({ title: '🎉 Rare Card!', description: 'Ditambahkan ke koleksimu.' });
+          toast({ title: '🎉 Rare Card!', description: 'Added to your collection.' });
         } else if (result === 'Epic Card') {
           setEpicCards(p => p + 1);
-          toast({ title: '🎉 Epic Card!', description: 'Ditambahkan ke koleksimu.' });
+          toast({ title: '🎉 Epic Card!', description: 'Added to your collection.' });
         } else if (result === 'Mythic Card') {
           setMythicCards(p => p + 1);
-          toast({ title: '🎉 Mythic Card!', description: 'Ditambahkan ke koleksimu.' });
+          toast({ title: '🎉 Mythic Card!', description: 'Added to your collection.' });
         }
       } catch {
-        toast({ title: 'Gagal menyimpan reward', variant: 'destructive' });
+        toast({ title: 'Failed to save reward', variant: 'destructive' });
       }
     } else if (result === 'Try Again!') {
       toast({ title: '🍀 Better luck next time!' });
@@ -357,7 +357,7 @@ export default function SpinPage() {
               </Button>
               {isLoaded && freeSpins <= 0 && adSpins <= 0 && (
                 <p className="text-xs text-muted-foreground">
-                  ⏰ Semua spin habis. Kembali besok!
+                  ⏰ All spins used up. Come back tomorrow!
                 </p>
               )}
             </div>
@@ -374,7 +374,11 @@ export default function SpinPage() {
               ].map(({ img, icon, label, val }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {img ? <Image src={img} alt={label} width={22} height={22} /> : icon}
+                    {img
+                      ? <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                          <Image src={img} alt={label} width={24} height={24} className="object-contain w-6 h-6" />
+                        </div>
+                      : icon}
                     <span className="text-sm text-muted-foreground">{label}</span>
                   </div>
                   <span className="font-bold">{val}</span>
