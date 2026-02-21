@@ -17,7 +17,6 @@ import { supabase } from '@/lib/supabase';
 
 const CLAIM_DURATION_MS = 2 * 60 * 60 * 1000;
 
-// Map upgrade id to Supabase column name
 const UPGRADE_COL: Record<string, string> = {
   'faucet-rate': 'upgrade_faucet_rate',
   'tap-power':   'upgrade_tap_power',
@@ -32,18 +31,15 @@ export default function FarmPage() {
   const [isUpgradeSheetOpen, setIsUpgradeSheetOpen] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<{ id: number; x: number; y: number }[]>([]);
   const [checkInCount, setCheckInCount] = useState(0);
-  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
 
-  // Upgrades state — initialized from upgradeDefinitions, levels loaded from Supabase
   const [upgrades, setUpgrades] = useState<Upgrade[]>(upgradeDefinitions);
 
   const { toast } = useToast();
   const { user: tgUser, isLoading } = useTelegram();
   const userId = tgUser?.id ?? null;
 
-  // Refs
   const tapBufferRef    = useRef(0);
   const tapSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapsLeftRef     = useRef(1000);
@@ -56,7 +52,6 @@ export default function FarmPage() {
     return () => { isMountedRef.current = false; };
   }, []);
 
-  // ── Computed from upgrades ────────────────────────────────
   const faucetUpgrade  = upgrades.find(u => u.id === 'faucet-rate');
   const faucetBenefit  = faucetUpgrade?.benefits[faucetUpgrade.level - 1] ?? '+200 RIBS/2hr';
   const claimAmount    = parseInt(faucetBenefit.match(/\d+/)?.[0] || '200');
@@ -71,7 +66,6 @@ export default function FarmPage() {
     (tapEnergyUpgrade?.benefits[tapEnergyUpgrade.level - 1] ?? '+1000 Taps').match(/\d+/)?.[0] || '1000'
   );
 
-  // ── Load user data from Supabase ──────────────────────────
   useEffect(() => {
     if (!userId || isLoading) return;
 
@@ -84,21 +78,12 @@ export default function FarmPage() {
         setBalance(profile.ribs ?? 0);
         setCheckInCount(profile.checkin_count ?? 0);
 
-        // Check-in status
-        if (profile.last_checkin) {
-          const lastDate  = new Date(profile.last_checkin).toISOString().split('T')[0];
-          const todayDate = new Date().toISOString().split('T')[0];
-          setHasCheckedInToday(lastDate === todayDate);
-        }
-
-        // Faucet timer
         if (profile.next_faucet_claim) {
           const nextClaim = new Date(profile.next_faucet_claim).getTime();
           setClaimTime(nextClaim > Date.now() ? nextClaim : Date.now());
           setIsActivated(true);
         }
 
-        // ── Load upgrade levels from Supabase ─────────────
         setUpgrades(prev => prev.map(u => {
           const col = UPGRADE_COL[u.id];
           if (!col) return u;
@@ -109,13 +94,11 @@ export default function FarmPage() {
           return u;
         }));
 
-        // ── Tap energy — daily reset check ────────────────
         const todayDate    = new Date().toISOString().split('T')[0];
         const savedReset   = profile.taps_reset_date
           ? new Date(profile.taps_reset_date).toISOString().split('T')[0]
           : null;
 
-        // dailyTaps might still be default here; we read from profile columns directly
         const savedTapEnergyLevel = profile.upgrade_tap_energy ?? 1;
         const tapEnergyBenefits   = ['1000', '2000', '3000'];
         const resolvedDailyTaps   = parseInt(tapEnergyBenefits[savedTapEnergyLevel - 1] || '1000');
@@ -144,7 +127,6 @@ export default function FarmPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, isLoading]);
 
-  // ── Flush on unmount ──────────────────────────────────────
   useEffect(() => {
     return () => {
       if (tapSaveTimerRef.current) clearTimeout(tapSaveTimerRef.current);
@@ -163,7 +145,6 @@ export default function FarmPage() {
     };
   }, []);
 
-  // ── Title ─────────────────────────────────────────────────
   const getUserTitle = (b: number) => {
     if (b >= 300000) return 'Legend';
     if (b >= 100000) return 'Grandmaster';
@@ -173,7 +154,6 @@ export default function FarmPage() {
     return 'Beginner';
   };
 
-  // ── Countdown timer ───────────────────────────────────────
   useEffect(() => {
     if (claimTime === null) return;
     const update = () => {
@@ -189,13 +169,10 @@ export default function FarmPage() {
     return () => clearInterval(iv);
   }, [claimTime]);
 
-  // ── Tap handler ───────────────────────────────────────────
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (tapsLeft < tapAmount || !isLoaded) return;
 
-    const energyCost = tapAmount;
-    if (tapsLeft < energyCost) return;
-    const newTaps = tapsLeft - energyCost;
+    const newTaps = tapsLeft - tapAmount;
     setTapsLeft(newTaps);
     tapsLeftRef.current = newTaps;
     setBalance(prev => prev + tapAmount);
@@ -221,7 +198,6 @@ export default function FarmPage() {
     setTimeout(() => setFloatingNumbers(curr => curr.filter(n => n.id !== newNum.id)), 1500);
   };
 
-  // ── Faucet activate ───────────────────────────────────────
   const handleActivate = async () => {
     if (!userId) return;
     const nextClaim = Date.now() + CLAIM_DURATION_MS;
@@ -240,7 +216,6 @@ export default function FarmPage() {
       });
   };
 
-  // ── Faucet claim ──────────────────────────────────────────
   const handleClaim = async () => {
     if (!userId) return;
     try {
@@ -253,7 +228,6 @@ export default function FarmPage() {
     }
   };
 
-  // ── Upgrade handler ───────────────────────────────────────
   const handleUpgrade = async (upgradeId: string) => {
     if (!userId) return;
 
@@ -272,12 +246,10 @@ export default function FarmPage() {
     const newLevel = upgrade.level + 1;
     const col      = UPGRADE_COL[upgradeId];
 
-    // Optimistic update
     setBalance(prev => prev - cost);
     setUpgrades(prev => prev.map((u, i) => i === idx ? { ...u, level: newLevel } : u));
 
     try {
-      // Save new level + deduct RIBS in parallel
       const [ribsRes, levelRes] = await Promise.all([
         supabase.rpc('increment_ribs', { user_id: userId, amount: -cost }),
         col
@@ -291,7 +263,6 @@ export default function FarmPage() {
       toast({ title: `✅ ${upgrade.name} upgraded to level ${newLevel}!` });
     } catch (e) {
       console.error('handleUpgrade error:', e);
-      // Rollback
       setBalance(prev => prev + cost);
       setUpgrades(prev => prev.map((u, i) => i === idx ? { ...u, level: upgrade.level } : u));
       toast({ title: 'Upgrade failed, please try again', variant: 'destructive' });
@@ -300,28 +271,16 @@ export default function FarmPage() {
 
   const userTitle = getUserTitle(balance);
 
-  // ── Render ────────────────────────────────────────────────
   return (
     <AppLayout>
       <div className="relative overflow-hidden">
         {/* Top row */}
         <div className="flex justify-between items-start mb-2">
           <div className="flex flex-col items-start gap-2">
+            {/* Check-in button — visually present but disabled; functionality is in Tasks page */}
             <Button
-              onClick={async () => {
-                if (!userId) return;
-                const res = await checkIn(userId);
-                if (res.success) {
-                  setCheckInCount(res.count || checkInCount + 1);
-                  setHasCheckedInToday(true);
-                  setBalance(prev => prev + 200);
-                  toast({ title: '✅ Checked in! +200 RIBS' });
-                } else {
-                  toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
-                }
-              }}
-              disabled={hasCheckedInToday || !isLoaded}
-              className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto"
+              disabled
+              className="bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900 font-bold text-xs px-3 py-1.5 h-auto opacity-60 cursor-not-allowed"
             >
               <CalendarCheck className="mr-2 h-4 w-4" /> Check-in: {checkInCount}x
             </Button>
