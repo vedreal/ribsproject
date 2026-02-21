@@ -359,14 +359,14 @@ export default function FarmPage() {
             <button
               onClick={handleTap}
               disabled={tapsLeft <= 0 || !isLoaded}
-              className="relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 flex items-center justify-center"
+              className="relative transition-transform duration-100 active:scale-95 disabled:opacity-50"
             >
               <Image
                 src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeigwlusnazuypgpol5nzay6oaktvebki7i4hwwrsztxfl6ilisb7om"
                 alt="RIBS"
-                width={96}
-                height={96}
-                className="rounded-full object-contain"
+                width={256}
+                height={256}
+                className="object-contain drop-shadow-2xl"
               />
               {floatingNumbers.map(num => (
                 <span
