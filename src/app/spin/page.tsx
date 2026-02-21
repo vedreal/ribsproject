@@ -21,18 +21,17 @@ import { supabase } from '@/lib/supabase';
 
 // ── Rewards & Wheel Config ────────────────────────────────────
 // Urutan segment searah jarum jam dari atas (12 o'clock)
-// Index 0 = segment paling atas saat wheel rotation = 0
 const REWARDS = [
-  '1 TON',       // index 0  — warna #818cf8
-  '5000 RIBS',   // index 1  — warna #c084fc
-  'Epic Card',   // index 2  — warna #f9a8d4
-  'Try Again!',  // index 3  — warna #fde047
-  '0.2 TON',     // index 4  — warna #a3e635
-  'Rare Card',   // index 5  — warna #4ade80
-  '500 RIBS',    // index 6  — warna #34d399
-  'Mythic Card', // index 7  — warna #22d3ee
-  '0.2 TON',     // index 8  — warna #38bdf8
-  '1 TON',       // index 9  — warna #60a5fa
+  '0.02 TON',    // index 0
+  '5000 RIBS',   // index 1
+  'Epic Card',   // index 2
+  'Try Again!',  // index 3
+  '0.2 TON',     // index 4
+  'Rare Card',   // index 5
+  '500 RIBS',    // index 6
+  'Mythic Card', // index 7
+  '100 RIBS',    // index 8  (was '0.2 TON' duplicate)
+  '250 RIBS',    // index 9  (was '1 TON' duplicate)
 ] as const;
 
 type Reward = typeof REWARDS[number];
@@ -45,17 +44,10 @@ const SEG_COLORS = [
   '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa',
 ];
 
-// CSS conic-gradient: 0deg = atas (12 o'clock), clockwise
-// Segment i mulai dari i*36 deg, selesai di (i+1)*36 deg
 const CONIC = `conic-gradient(${SEG_COLORS.map((c, i) =>
   `${c} ${i * SEG_DEG}deg ${(i + 1) * SEG_DEG}deg`
 ).join(', ')})`;
 
-// ── Baca reward dari posisi wheel ─────────────────────────────
-// Setelah wheel rotate R derajat (clockwise):
-//   Segment yang ada di atas = segment yang menempati posisi (360 - R%360) % 360
-//   karena wheel berputar clockwise, titik yang tadinya di bawah naik ke atas
-// Segment i menempati: i*36 s/d (i+1)*36 deg
 function getRewardFromRotation(totalRotation: number): { index: number; reward: Reward } {
   const R = ((totalRotation % 360) + 360) % 360;
   const posAtTop = (360 - R) % 360;
@@ -67,7 +59,6 @@ const DEFAULT_FREE = 1;
 const DEFAULT_AD   = 2;
 
 export default function SpinPage() {
-  // Spin state
   const [freeSpins, setFreeSpins] = useState(DEFAULT_FREE);
   const [adSpins,   setAdSpins]   = useState(DEFAULT_AD);
   const [isSpinning,  setIsSpinning]  = useState(false);
@@ -80,15 +71,13 @@ export default function SpinPage() {
   const { toast } = useToast();
   const { user: tgUser, isLoading } = useTelegram();
 
-  // Rewards balance
   const [tonBalance,   setTonBalance]   = useState(0);
   const [rareCards,    setRareCards]    = useState(0);
   const [epicCards,    setEpicCards]    = useState(0);
   const [mythicCards,  setMythicCards]  = useState(0);
   const [ribsBalance,  setRibsBalance]  = useState(0);
 
-  // Refs
-  const wheelRotationRef = useRef(0); // track akumulasi rotation
+  const wheelRotationRef = useRef(0);
   const freeSpinsRef     = useRef(DEFAULT_FREE);
   const adSpinsRef       = useRef(DEFAULT_AD);
   const userIdRef        = useRef<number | null>(null);
@@ -137,7 +126,6 @@ export default function SpinPage() {
     })();
   }, [tgUser?.id, isLoading]);
 
-  // ── Save spin count ─────────────────────────────────────
   const saveSpinCount = (uid: number, fs: number, as: number) => {
     supabase.from('users').update({ free_spins_left: fs, ad_spins_left: as })
       .eq('id', uid).then(({ error }) => error && console.error('saveSpinCount:', error));
@@ -150,31 +138,26 @@ export default function SpinPage() {
 
     const uid = userIdRef.current;
 
-    // Kurangi jatah spin
     let fs = freeSpinsRef.current;
     let as = adSpinsRef.current;
     if (isAdSpin) { as = Math.max(0, as - 1); setAdSpins(as);   adSpinsRef.current   = as; }
     else          { fs = Math.max(0, fs - 1); setFreeSpins(fs); freeSpinsRef.current = fs; }
     if (uid) saveSpinCount(uid, fs, as);
 
-    // ── KUNCI: putar wheel secara random, lalu baca hasilnya ──
-    // Random sudut tambahan antara 0–359 deg (resolusi per derajat)
     const randomExtra = Math.floor(Math.random() * 360);
-    const fullSpins   = 5 * 360; // 5 putaran penuh
+    const fullSpins   = 5 * 360;
     const added       = fullSpins + randomExtra;
     const newTotal    = wheelRotationRef.current + added;
 
     wheelRotationRef.current = newTotal;
     setWheelRotation(newTotal);
 
-    // Baca reward dari posisi AKHIR wheel — 100% sinkron dengan visual
     const { reward } = getRewardFromRotation(newTotal);
 
-    // Tampilkan modal setelah animasi selesai
     setTimeout(() => {
       setResult(reward);
       setIsModalOpen(true);
-    }, 5200); // sedikit lebih dari durasi CSS transition (5s)
+    }, 5200);
   };
 
   const handleSpin = (isAdSpin: boolean) => {
@@ -189,7 +172,7 @@ export default function SpinPage() {
     }
   };
 
-  // ── Close modal & simpan reward ─────────────────────────
+  // ── Close modal & save reward ───────────────────────────
   const closeModal = async () => {
     if (!result || isSaving) return;
     setIsSaving(true);
@@ -198,14 +181,25 @@ export default function SpinPage() {
     if (uid && result !== 'Try Again!') {
       try {
         await saveSpinReward(uid, result);
-        if (result.includes('TON')) {
-          const amt = parseFloat(result.split(' ')[0]);
-          setTonBalance(p => p + amt);
-          toast({ title: '🎉 TON Added!', description: `+${amt} TON saved to your balance.` });
-        } else if (result.includes('RIBS')) {
-          const amt = parseInt(result.split(' ')[0]);
-          setRibsBalance(p => p + amt);
-          toast({ title: '🎉 RIBS Added!', description: `+${amt} RIBS saved.` });
+
+        if (result === '0.02 TON') {
+          setTonBalance(p => p + 0.02);
+          toast({ title: '🎉 TON Added!', description: '+0.02 TON saved to your balance.' });
+        } else if (result === '0.2 TON') {
+          setTonBalance(p => p + 0.2);
+          toast({ title: '🎉 TON Added!', description: '+0.2 TON saved to your balance.' });
+        } else if (result === '100 RIBS') {
+          setRibsBalance(p => p + 100);
+          toast({ title: '🎉 RIBS Added!', description: '+100 RIBS saved.' });
+        } else if (result === '250 RIBS') {
+          setRibsBalance(p => p + 250);
+          toast({ title: '🎉 RIBS Added!', description: '+250 RIBS saved.' });
+        } else if (result === '500 RIBS') {
+          setRibsBalance(p => p + 500);
+          toast({ title: '🎉 RIBS Added!', description: '+500 RIBS saved.' });
+        } else if (result === '5000 RIBS') {
+          setRibsBalance(p => p + 5000);
+          toast({ title: '🎉 RIBS Added!', description: '+5000 RIBS saved.' });
         } else if (result === 'Rare Card') {
           setRareCards(p => p + 1);
           toast({ title: '🎉 Rare Card!', description: 'Added to your collection.' });
@@ -229,7 +223,7 @@ export default function SpinPage() {
     setIsSaving(false);
   };
 
-  // ── Reward display ──────────────────────────────────────
+  // ── Reward display in modal ─────────────────────────────
   const RewardDisplay = () => {
     if (!result) return null;
     if (result === 'Mythic Card') return (
@@ -257,6 +251,7 @@ export default function SpinPage() {
       </div>
     );
     if (result === 'Try Again!') return <p className="text-4xl font-bold text-muted-foreground">🍀 Try Again!</p>;
+    // All RIBS rewards
     return (
       <div className="flex items-center gap-3 text-4xl font-bold text-primary">
         <RibsIcon className="w-12 h-12" />
@@ -264,6 +259,9 @@ export default function SpinPage() {
       </div>
     );
   };
+
+  // Icon size constant for My Rewards card — all same size
+  const REWARD_ICON_SIZE = 24;
 
   // ── Render ──────────────────────────────────────────────
   return (
@@ -280,7 +278,7 @@ export default function SpinPage() {
             {/* ── Wheel ── */}
             <div className="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center">
 
-              {/* Penunjuk — tepat di atas, center horizontal */}
+              {/* Pointer */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20">
                 <div className="w-0 h-0
                   border-l-[12px] border-l-transparent
@@ -298,15 +296,10 @@ export default function SpinPage() {
                   transform: `rotate(${wheelRotation}deg)`,
                 }}
               >
-                {/* Background warna */}
                 <div className="absolute inset-0 rounded-full" style={{ background: CONIC }} />
 
-                {/* Teks tiap segment
-                    Container diputar ke tengah segment (i*36+18 deg dari atas)
-                    Teks ditulis vertikal dari luar ke dalam
-                */}
                 {REWARDS.map((reward, i) => {
-                  const midDeg = i * SEG_DEG + SEG_DEG / 2; // tengah segment dari atas
+                  const midDeg = i * SEG_DEG + SEG_DEG / 2;
                   return (
                     <div
                       key={i}
@@ -317,7 +310,7 @@ export default function SpinPage() {
                         className="mt-2 text-[9px] font-black text-slate-900 leading-tight select-none"
                         style={{
                           writingMode: 'vertical-lr',
-                          transform: 'rotate(180deg)', // balik agar baca dari luar ke dalam
+                          transform: 'rotate(180deg)',
                           textShadow: '0 1px 2px rgba(255,255,255,0.6)',
                           maxHeight: '44%',
                         }}
@@ -335,7 +328,7 @@ export default function SpinPage() {
               </div>
             </div>
 
-            {/* ── Tombol spin ── */}
+            {/* ── Spin buttons ── */}
             <div className="flex flex-col gap-3 w-full max-w-sm">
               <Button
                 size="lg"
@@ -366,19 +359,45 @@ export default function SpinPage() {
             <div className="w-full max-w-sm rounded-xl bg-gradient-to-br from-secondary to-card border border-border p-5 text-left space-y-3">
               <h2 className="font-headline text-xl font-semibold text-center">My Rewards</h2>
               {[
-                { img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafkreib6wlrvvorkcbkma43liqxrm4dv7hgad4jbqlcjzaa6rynileb7c4', label: 'TON Balance',   val: `${tonBalance.toFixed(2)} TON` },
-                { icon: <RibsIcon className="w-5 h-5 text-primary" />,                                                                                label: 'RIBS Balance',  val: ribsBalance.toLocaleString() },
-                { img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeigzzuj4h2dubddoshcjm2jzbtdbvdeoyghtawnkun4mzwjz22e3sm', label: 'Rare Cards',    val: rareCards },
-                { img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidw7yyryxsvkrnvt3iq265sgzlxqgdqyjof2f37boirniov3c7ene', label: 'Epic Cards',    val: epicCards },
-                { img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidqm2w7kvkcxgowstbptive5vjyuwnabl5rcammfkkasjioabrxle', label: 'Mythic Cards',  val: mythicCards },
+                {
+                  img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafkreib6wlrvvorkcbkma43liqxrm4dv7hgad4jbqlcjzaa6rynileb7c4',
+                  label: 'TON Balance',
+                  val: `${tonBalance.toFixed(2)} TON`,
+                },
+                {
+                  icon: <RibsIcon className="w-6 h-6 text-primary" />,
+                  label: 'RIBS Balance',
+                  val: ribsBalance.toLocaleString(),
+                },
+                {
+                  img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeigzzuj4h2dubddoshcjm2jzbtdbvdeoyghtawnkun4mzwjz22e3sm',
+                  label: 'Rare Cards',
+                  val: rareCards,
+                },
+                {
+                  img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidw7yyryxsvkrnvt3iq265sgzlxqgdqyjof2f37boirniov3c7ene',
+                  label: 'Epic Cards',
+                  val: epicCards,
+                },
+                {
+                  img: 'https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeidqm2w7kvkcxgowstbptive5vjyuwnabl5rcammfkkasjioabrxle',
+                  label: 'Mythic Cards',
+                  val: mythicCards,
+                },
               ].map(({ img, icon, label, val }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {img
-                      ? <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                          <Image src={img} alt={label} width={24} height={24} className="object-contain w-6 h-6" />
-                        </div>
-                      : icon}
+                    {img ? (
+                      <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                        <Image
+                          src={img}
+                          alt={label}
+                          width={REWARD_ICON_SIZE}
+                          height={REWARD_ICON_SIZE}
+                          className="object-contain w-6 h-6"
+                        />
+                      </div>
+                    ) : icon}
                     <span className="text-sm text-muted-foreground">{label}</span>
                   </div>
                   <span className="font-bold">{val}</span>
@@ -394,7 +413,7 @@ export default function SpinPage() {
         </div>
       </AppLayout>
 
-      {/* ── Modal hadiah ── */}
+      {/* ── Result modal ── */}
       <AlertDialog open={isModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
