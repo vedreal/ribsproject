@@ -31,7 +31,7 @@ declare global {
 }
 
 // ============================================================
-// CONTEXT - agar komponen lain bisa akses status user
+// CONTEXT
 // ============================================================
 type TelegramUser = {
   id: number;
@@ -62,7 +62,6 @@ function waitForTelegramWebApp(maxWaitMs = 5000): Promise<boolean> {
     const startTime = Date.now();
 
     const check = () => {
-      // Cek apakah Telegram WebApp sudah ada dan punya initDataUnsafe
       if (
         typeof window !== 'undefined' &&
         window.Telegram?.WebApp?.initDataUnsafe
@@ -71,14 +70,12 @@ function waitForTelegramWebApp(maxWaitMs = 5000): Promise<boolean> {
         return;
       }
 
-      // Timeout jika sudah terlalu lama
       if (Date.now() - startTime > maxWaitMs) {
         console.warn('[TelegramProvider] Timeout waiting for Telegram WebApp');
         resolve(false);
         return;
       }
 
-      // Coba lagi dalam 100ms
       setTimeout(check, 100);
     };
 
@@ -87,32 +84,64 @@ function waitForTelegramWebApp(maxWaitMs = 5000): Promise<boolean> {
 }
 
 // ============================================================
-// HELPER: Sync user ke Supabase dengan retry
+// HELPER: Sync user ke Supabase
 // ============================================================
 async function syncUserToSupabase(
   tgUser: TelegramUser,
+  startParam: string | undefined,
   retries = 3
 ): Promise<any> {
+  // ── Parse referrer ID ──────────────────────────────────────
+  // start_param bisa berupa:
+  //   "7123867002"       (format baru — hanya angka)
+  //   "ref_7123867002"   (format lama — dengan prefix)
+  let referredBy: number | null = null;
+  if (startParam) {
+    const cleaned = startParam.replace(/^ref_/, '');
+    const parsed = parseInt(cleaned, 10);
+    if (!isNaN(parsed) && parsed !== tgUser.id) {
+      referredBy = parsed;
+    }
+  }
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      console.log(`[Supabase] Sync attempt ${attempt} for user:`, tgUser.id);
+      console.log(
+        `[Supabase] Sync attempt ${attempt} for user:`,
+        tgUser.id,
+        referredBy ? `referred by ${referredBy}` : '(no referrer)'
+      );
+
+      // Cek apakah user sudah ada (untuk tidak overwrite referred_by)
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id, referred_by')
+        .eq('id', tgUser.id)
+        .maybeSingle();
+
+      const upsertPayload: Record<string, any> = {
+        id: tgUser.id,
+        username: tgUser.username || `user_${tgUser.id}`,
+        first_name: tgUser.first_name || '',
+        last_name: tgUser.last_name || '',
+        photo_url: (tgUser as any).photo_url || '',
+        // referral_code = pure numeric user ID (no prefix)
+        referral_code: String(tgUser.id),
+      };
+
+      // Hanya set referred_by jika:
+      // 1. Ada start_param valid, DAN
+      // 2. User baru (belum ada di DB) atau belum punya referred_by
+      if (referredBy && (!existing || !existing.referred_by)) {
+        upsertPayload.referred_by = referredBy;
+      }
 
       const { data, error } = await supabase
         .from('users')
-        .upsert(
-          {
-            id: tgUser.id,
-            username: tgUser.username || `user_${tgUser.id}`,
-            first_name: tgUser.first_name || '',
-            last_name: tgUser.last_name || '',
-            photo_url: (tgUser as any).photo_url || '',
-            referral_code: `ref_${tgUser.id}`,
-          },
-          {
-            onConflict: 'id',
-            ignoreDuplicates: false,
-          }
-        )
+        .upsert(upsertPayload, {
+          onConflict: 'id',
+          ignoreDuplicates: false,
+        })
         .select()
         .single();
 
@@ -152,7 +181,6 @@ export function TelegramProvider({ children }: PropsWithChildren) {
     async function initialize() {
       console.log('[TelegramProvider] Initializing...');
 
-      // 1. Tunggu Telegram WebApp script siap (polling, bukan timeout tetap)
       const isReady = await waitForTelegramWebApp(5000);
 
       if (cancelled) return;
@@ -165,7 +193,6 @@ export function TelegramProvider({ children }: PropsWithChildren) {
 
       const webApp = window.Telegram.WebApp;
 
-      // 2. Panggil ready() dan expand() untuk konfigurasi tampilan
       try {
         webApp.ready();
         webApp.expand();
@@ -173,12 +200,13 @@ export function TelegramProvider({ children }: PropsWithChildren) {
         console.error('[TelegramProvider] WebApp init error:', e);
       }
 
-      // 3. Ambil data user dari initDataUnsafe
       const tgUser = webApp.initDataUnsafe?.user;
+      const startParam = webApp.initDataUnsafe?.start_param;
+
+      console.log('[TelegramProvider] start_param:', startParam);
 
       if (!tgUser || !tgUser.id) {
-        console.warn('[TelegramProvider] No user in initDataUnsafe. Pastikan bot dikonfigurasi dengan benar.');
-        console.warn('[TelegramProvider] initDataUnsafe:', webApp.initDataUnsafe);
+        console.warn('[TelegramProvider] No user in initDataUnsafe.');
         setIsLoading(false);
         return;
       }
@@ -186,8 +214,8 @@ export function TelegramProvider({ children }: PropsWithChildren) {
       console.log('[TelegramProvider] ✅ Got Telegram user:', tgUser);
       setUser(tgUser);
 
-      // 4. Sync ke Supabase
-      const syncedData = await syncUserToSupabase(tgUser);
+      // Sync ke Supabase — pass start_param agar referred_by tersimpan
+      const syncedData = await syncUserToSupabase(tgUser, startParam);
       if (!cancelled) {
         setIsSynced(!!syncedData);
         setIsLoading(false);
