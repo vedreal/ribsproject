@@ -191,9 +191,11 @@ export default function FarmPage() {
 
   // ── Tap handler ───────────────────────────────────────────
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (tapsLeft <= 0 || !isLoaded) return;
+    if (tapsLeft < tapAmount || !isLoaded) return;
 
-    const newTaps = tapsLeft - 1;
+    const energyCost = tapAmount;
+    if (tapsLeft < energyCost) return;
+    const newTaps = tapsLeft - energyCost;
     setTapsLeft(newTaps);
     tapsLeftRef.current = newTaps;
     setBalance(prev => prev + tapAmount);
@@ -331,10 +333,13 @@ export default function FarmPage() {
           </div>
 
           <div className={cn(
-            'text-xs font-bold px-3 py-1.5 rounded-full shadow-md',
-            balance >= 300000
-              ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black'
-              : 'bg-secondary'
+            'text-xs font-bold px-3 py-1.5 rounded-full shadow-md text-white',
+            userTitle === 'Legend'      && 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black',
+            userTitle === 'Grandmaster' && 'bg-gradient-to-r from-purple-500 to-violet-700',
+            userTitle === 'Master'      && 'bg-gradient-to-r from-red-500 to-rose-700',
+            userTitle === 'Elite'       && 'bg-gradient-to-r from-blue-700 to-blue-900',
+            userTitle === 'Skilled'     && 'bg-gradient-to-r from-sky-400 to-cyan-500',
+            userTitle === 'Beginner'    && 'bg-gradient-to-b from-slate-300 to-slate-500 text-slate-900',
           )}>
             {userTitle}
           </div>
@@ -345,9 +350,7 @@ export default function FarmPage() {
           <div>
             <p className="text-muted-foreground flex items-center justify-center gap-2 mb-1 text-sm">
               <RibsIcon className="w-4 h-4" />
-              {tgUser
-                ? `@${tgUser.username || tgUser.first_name || 'User'}'s RIBS`
-                : 'RIBS Balance'}
+              RIBS Balance
             </p>
             <h1 className="font-headline text-5xl font-bold text-primary">
               {balance.toLocaleString('en-US')}
@@ -358,7 +361,7 @@ export default function FarmPage() {
           <div className="flex flex-col items-center space-y-4">
             <button
               onClick={handleTap}
-              disabled={tapsLeft <= 0 || !isLoaded}
+              disabled={tapsLeft < tapAmount || !isLoaded}
               className="relative transition-transform duration-100 active:scale-95 disabled:opacity-50"
             >
               <Image
@@ -387,7 +390,7 @@ export default function FarmPage() {
                   : 'Loading...'}
               </p>
               <Progress value={isLoaded ? (tapsLeft / dailyTaps) * 100 : 0} className="h-3" />
-              {tapsLeft <= 0 && isLoaded && (
+              {tapsLeft < tapAmount && isLoaded && (
                 <p className="text-xs text-destructive font-medium mt-1">
                   ⚡ Energy depleted! Come back tomorrow.
                 </p>
