@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/ribs/app-layout';
 import { Button } from '@/components/ui/button';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
@@ -11,6 +11,7 @@ import { getUserProfile } from '@/lib/data';
 import { Copy, Users } from 'lucide-react';
 
 const RIBS_PER_REFERRAL = 100;
+// startapp param = pure numeric userId (no prefix)
 const MINIAPP_BASE = 'https://t.me/ribscoin_bot/RIBS?startapp=';
 
 export default function RefsPage() {
@@ -24,6 +25,7 @@ export default function RefsPage() {
   const [referrals,       setReferrals]       = useState<{ username: string | null; first_name: string | null; ribs: number }[]>([]);
   const [isLoaded,        setIsLoaded]        = useState(false);
 
+  // Pure numeric userId as startapp param — Telegram will pass it as start_param
   const referralLink = userId ? `${MINIAPP_BASE}${userId}` : '';
 
   // ── Load & check for new referrals to reward ───────────
