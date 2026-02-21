@@ -7,14 +7,15 @@ import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useTelegram } from '@/components/telegram-provider';
 import { supabase } from '@/lib/supabase';
-import { getUserProfile } from '@/lib/data';
+import { getUserProfile, checkIn } from '@/lib/data';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const DAILY_ADS_MAX   = 3;
-const RIBS_PER_AD     = 200; // 600 total / 3 ads
-const INVITE3_REWARD  = 500;
-const INVITE5_REWARD  = 1000;
+const DAILY_ADS_MAX    = 3;
+const RIBS_PER_AD      = 200;
+const CHECKIN_REWARD   = 200;
+const INVITE3_REWARD   = 500;
+const INVITE5_REWARD   = 1000;
 const FOLLOW_TG_REWARD = 300;
 const FOLLOW_X_REWARD  = 300;
 
@@ -24,20 +25,23 @@ export default function TasksPage() {
   const userId = tgUser?.id ?? null;
 
   // Task states
-  const [adsLeft,        setAdsLeft]        = useState(DAILY_ADS_MAX);
-  const [invite3Done,    setInvite3Done]    = useState(false);
-  const [invite5Done,    setInvite5Done]    = useState(false);
-  const [followTgDone,   setFollowTgDone]   = useState(false);
-  const [followXDone,    setFollowXDone]    = useState(false);
-  const [balance,        setBalance]        = useState(0);
-  const [isLoaded,       setIsLoaded]       = useState(false);
+  const [adsLeft,          setAdsLeft]          = useState(DAILY_ADS_MAX);
+  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
+  const [checkInCount,     setCheckInCount]     = useState(0);
+  const [invite3Done,      setInvite3Done]      = useState(false);
+  const [invite5Done,      setInvite5Done]      = useState(false);
+  const [followTgDone,     setFollowTgDone]     = useState(false);
+  const [followXDone,      setFollowXDone]      = useState(false);
+  const [balance,          setBalance]          = useState(0);
+  const [isLoaded,         setIsLoaded]         = useState(false);
 
   // Button loading states
-  const [loadingAd,      setLoadingAd]      = useState(false);
-  const [loadingInvite3, setLoadingInvite3] = useState(false);
-  const [loadingInvite5, setLoadingInvite5] = useState(false);
-  const [loadingTg,      setLoadingTg]      = useState(false);
-  const [loadingX,       setLoadingX]       = useState(false);
+  const [loadingCheckIn,   setLoadingCheckIn]   = useState(false);
+  const [loadingAd,        setLoadingAd]        = useState(false);
+  const [loadingInvite3,   setLoadingInvite3]   = useState(false);
+  const [loadingInvite5,   setLoadingInvite5]   = useState(false);
+  const [loadingTg,        setLoadingTg]        = useState(false);
+  const [loadingX,         setLoadingX]         = useState(false);
 
   // ── Load from Supabase ──────────────────────────────────
   useEffect(() => {
@@ -49,10 +53,18 @@ export default function TasksPage() {
         if (!profile) { setIsLoaded(true); return; }
 
         setBalance(profile.ribs ?? 0);
+        setCheckInCount(profile.checkin_count ?? 0);
         setInvite3Done(profile.task_invite3_done   ?? false);
         setInvite5Done(profile.task_invite5_done   ?? false);
         setFollowTgDone(profile.task_follow_tg_done ?? false);
         setFollowXDone(profile.task_follow_x_done  ?? false);
+
+        // Check-in status — did user already check in today?
+        if (profile.last_checkin) {
+          const lastDate  = new Date(profile.last_checkin).toISOString().split('T')[0];
+          const todayDate = new Date().toISOString().split('T')[0];
+          setHasCheckedInToday(lastDate === todayDate);
+        }
 
         // Daily ads — check reset
         const today     = new Date().toISOString().split('T')[0];
@@ -61,7 +73,6 @@ export default function TasksPage() {
           : null;
 
         if (!savedDate || savedDate !== today) {
-          // New day → reset ads
           setAdsLeft(DAILY_ADS_MAX);
           supabase.from('users').update({
             task_daily_ads_count: DAILY_ADS_MAX,
@@ -86,12 +97,32 @@ export default function TasksPage() {
     setBalance(prev => prev + amount);
   };
 
+  // ── Task 0: Daily Check-in ──────────────────────────────
+  const handleCheckIn = async () => {
+    if (!userId || hasCheckedInToday || loadingCheckIn) return;
+    setLoadingCheckIn(true);
+
+    try {
+      const res = await checkIn(userId);
+      if (res.success) {
+        setCheckInCount(res.count || checkInCount + 1);
+        setHasCheckedInToday(true);
+        setBalance(prev => prev + CHECKIN_REWARD);
+        toast({ title: `✅ Checked in! +${CHECKIN_REWARD} RIBS` });
+      } else {
+        toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Check-in failed, please try again', variant: 'destructive' });
+    }
+    setLoadingCheckIn(false);
+  };
+
   // ── Task 1: Watch Daily Ad ──────────────────────────────
   const handleWatchAd = async () => {
     if (!userId || adsLeft <= 0 || loadingAd) return;
     setLoadingAd(true);
 
-    // Simulate ad watching (3 seconds)
     await new Promise(r => setTimeout(r, 3000));
 
     const newAdsLeft = adsLeft - 1;
@@ -177,10 +208,7 @@ export default function TasksPage() {
     if (!userId || followTgDone || loadingTg) return;
     setLoadingTg(true);
 
-    // Open Telegram channel
     window.open('https://t.me/ribscoin', '_blank');
-
-    // Wait 10 seconds then reward
     await new Promise(r => setTimeout(r, 10000));
 
     try {
@@ -201,10 +229,7 @@ export default function TasksPage() {
     if (!userId || followXDone || loadingX) return;
     setLoadingX(true);
 
-    // Open X/Twitter account
     window.open('https://x.com/ribscoin', '_blank');
-
-    // Wait 10 seconds then reward
     await new Promise(r => setTimeout(r, 10000));
 
     try {
@@ -293,6 +318,21 @@ export default function TasksPage() {
 
           {/* Daily */}
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Daily</p>
+
+          {/* Check-in — first daily task */}
+          <TaskRow
+            icon="📅"
+            title="Daily Check-in"
+            description={`Streak: ${checkInCount}x check-in${checkInCount !== 1 ? 's' : ''}`}
+            reward={CHECKIN_REWARD}
+            done={hasCheckedInToday}
+            loading={loadingCheckIn}
+            onAction={handleCheckIn}
+            actionLabel="Check"
+            disabled={hasCheckedInToday}
+          />
+
+          {/* Watch Ads */}
           <TaskRow
             icon="📺"
             title="Watch Daily Ads"
