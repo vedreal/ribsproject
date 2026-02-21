@@ -9,12 +9,19 @@ import { AppLayout } from '@/components/ribs/app-layout';
 import { RibsIcon } from '@/components/ribs/ribs-icon';
 import { UpgradeSheet } from '@/components/ribs/upgrade-sheet';
 import { cn } from '@/lib/utils';
-import { upgrades as initialUpgrades, type Upgrade, getUserProfile, checkIn, claimFaucet } from '@/lib/data';
+import { upgrades as upgradeDefinitions, type Upgrade, getUserProfile, checkIn, claimFaucet } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useTelegram } from '@/components/telegram-provider';
 import { supabase } from '@/lib/supabase';
 
 const CLAIM_DURATION_MS = 2 * 60 * 60 * 1000;
+
+// Map upgrade id to Supabase column name
+const UPGRADE_COL: Record<string, string> = {
+  'faucet-rate': 'upgrade_faucet_rate',
+  'tap-power':   'upgrade_tap_power',
+  'tap-energy':  'upgrade_tap_energy',
+};
 
 export default function FarmPage() {
   const [balance, setBalance] = useState(0);
@@ -27,89 +34,58 @@ export default function FarmPage() {
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
-  const { toast } = useToast();
-  const [upgrades, setUpgrades] = useState<Upgrade[]>(initialUpgrades);
 
+  // Upgrades state — initialized from upgradeDefinitions, levels loaded from Supabase
+  const [upgrades, setUpgrades] = useState<Upgrade[]>(upgradeDefinitions);
+
+  const { toast } = useToast();
   const { user: tgUser, isLoading } = useTelegram();
   const userId = tgUser?.id ?? null;
 
-  // Semua refs — tidak trigger re-render, aman di cleanup
-  const tapBufferRef = useRef(0);
+  // Refs
+  const tapBufferRef    = useRef(0);
   const tapSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tapsLeftRef = useRef(1000);
-  const userIdRef = useRef<number | null>(null);
-  const isMountedRef = useRef(true);
+  const tapsLeftRef     = useRef(1000);
+  const userIdRef       = useRef<number | null>(null);
+  const isMountedRef    = useRef(true);
 
-  // Sync userId ke ref setiap kali berubah
-  useEffect(() => {
-    userIdRef.current = userId;
-  }, [userId]);
-
-  // Mark unmounted saat cleanup
+  useEffect(() => { userIdRef.current = userId; }, [userId]);
   useEffect(() => {
     isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
-  // ── Computed dari upgrades ──────────────────────────────
-  const faucetUpgrade = upgrades.find(u => u.id === 'faucet-rate');
-  const faucetBenefit = faucetUpgrade
-    ? faucetUpgrade.benefits[faucetUpgrade.level - 1]
-    : '+200 RIBS/2hr';
-  const claimAmount = parseInt(faucetBenefit.match(/\d+/)?.[0] || '200');
+  // ── Computed from upgrades ────────────────────────────────
+  const faucetUpgrade  = upgrades.find(u => u.id === 'faucet-rate');
+  const faucetBenefit  = faucetUpgrade?.benefits[faucetUpgrade.level - 1] ?? '+200 RIBS/2hr';
+  const claimAmount    = parseInt(faucetBenefit.match(/\d+/)?.[0] || '200');
 
   const tapPowerUpgrade = upgrades.find(u => u.id === 'tap-power');
-  const tapAmount = parseInt(
+  const tapAmount       = parseInt(
     (tapPowerUpgrade?.benefits[tapPowerUpgrade.level - 1] ?? '+1 RIBS/tap').match(/\d+/)?.[0] || '1'
   );
 
   const tapEnergyUpgrade = upgrades.find(u => u.id === 'tap-energy');
-  const dailyTaps = parseInt(
+  const dailyTaps        = parseInt(
     (tapEnergyUpgrade?.benefits[tapEnergyUpgrade.level - 1] ?? '+1000 Taps').match(/\d+/)?.[0] || '1000'
   );
 
-  // ── Helper: save ke Supabase (tidak throw, hanya log) ───
-  const safeSaveTaps = useCallback(async (uid: number, taps: number) => {
-    try {
-      await supabase
-        .from('users')
-        .update({ taps_left: taps })
-        .eq('id', uid);
-    } catch (e) {
-      console.error('safeSaveTaps error:', e);
-    }
-  }, []);
-
-  const safeSaveRibs = useCallback(async (uid: number, amount: number) => {
-    try {
-      await supabase.rpc('increment_ribs', { user_id: uid, amount });
-    } catch (e) {
-      console.error('safeSaveRibs error:', e);
-    }
-  }, []);
-
-  // ── Load user data saat mount ────────────────────────────
+  // ── Load user data from Supabase ──────────────────────────
   useEffect(() => {
     if (!userId || isLoading) return;
 
-    const fetchUserData = async () => {
+    (async () => {
       try {
         const profile = await getUserProfile(userId);
-        if (!profile) {
-          setIsLoaded(true);
-          return;
-        }
-
+        if (!profile) { setIsLoaded(true); return; }
         if (!isMountedRef.current) return;
 
         setBalance(profile.ribs ?? 0);
         setCheckInCount(profile.checkin_count ?? 0);
 
-        // Check-in hari ini
+        // Check-in status
         if (profile.last_checkin) {
-          const lastDate = new Date(profile.last_checkin).toISOString().split('T')[0];
+          const lastDate  = new Date(profile.last_checkin).toISOString().split('T')[0];
           const todayDate = new Date().toISOString().split('T')[0];
           setHasCheckedInToday(lastDate === todayDate);
         }
@@ -121,26 +97,37 @@ export default function FarmPage() {
           setIsActivated(true);
         }
 
-        // Tap energy — reset harian
-        const todayDate = new Date().toISOString().split('T')[0];
-        const savedResetDate = profile.taps_reset_date
+        // ── Load upgrade levels from Supabase ─────────────
+        setUpgrades(prev => prev.map(u => {
+          const col = UPGRADE_COL[u.id];
+          if (!col) return u;
+          const savedLevel = profile[col];
+          if (typeof savedLevel === 'number' && savedLevel >= 1 && savedLevel <= u.maxLevel) {
+            return { ...u, level: savedLevel };
+          }
+          return u;
+        }));
+
+        // ── Tap energy — daily reset check ────────────────
+        const todayDate    = new Date().toISOString().split('T')[0];
+        const savedReset   = profile.taps_reset_date
           ? new Date(profile.taps_reset_date).toISOString().split('T')[0]
           : null;
 
-        let restoredTaps: number;
+        // dailyTaps might still be default here; we read from profile columns directly
+        const savedTapEnergyLevel = profile.upgrade_tap_energy ?? 1;
+        const tapEnergyBenefits   = ['1000', '2000', '3000'];
+        const resolvedDailyTaps   = parseInt(tapEnergyBenefits[savedTapEnergyLevel - 1] || '1000');
 
-        if (!savedResetDate || savedResetDate !== todayDate) {
-          // Hari baru → reset ke penuh
-          restoredTaps = dailyTaps;
-          // Fire and forget — tidak await agar tidak block render
+        let restoredTaps: number;
+        if (!savedReset || savedReset !== todayDate) {
+          restoredTaps = resolvedDailyTaps;
           supabase.from('users').update({
-            taps_left: dailyTaps,
+            taps_left: resolvedDailyTaps,
             taps_reset_date: todayDate,
-          }).eq('id', userId).then(({ error }) => {
-            if (error) console.error('Reset taps error:', error);
-          });
+          }).eq('id', userId).then(({ error }) => error && console.error('Reset taps:', error));
         } else {
-          restoredTaps = Math.min(profile.taps_left ?? dailyTaps, dailyTaps);
+          restoredTaps = Math.min(profile.taps_left ?? resolvedDailyTaps, resolvedDailyTaps);
         }
 
         if (isMountedRef.current) {
@@ -152,135 +139,105 @@ export default function FarmPage() {
         console.error('fetchUserData error:', e);
         if (isMountedRef.current) setIsLoaded(true);
       }
-    };
-
-    fetchUserData();
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, isLoading]);
 
-  // ── Flush saat pindah halaman (cleanup) ─────────────────
-  // PENTING: cleanup function harus SYNCHRONOUS.
-  // Kita gunakan fire-and-forget (tidak await) agar tidak crash.
+  // ── Flush on unmount ──────────────────────────────────────
   useEffect(() => {
     return () => {
-      // Cancel debounce timer
-      if (tapSaveTimerRef.current) {
-        clearTimeout(tapSaveTimerRef.current);
-        tapSaveTimerRef.current = null;
-      }
-
+      if (tapSaveTimerRef.current) clearTimeout(tapSaveTimerRef.current);
       const uid = userIdRef.current;
       if (!uid) return;
 
-      // Fire and forget — sync cleanup, async execution
-      // Simpan taps_left
-      supabase
-        .from('users')
-        .update({ taps_left: tapsLeftRef.current })
-        .eq('id', uid)
-        .then(({ error }) => {
-          if (error) console.error('Cleanup save taps_left error:', error);
-        });
+      supabase.from('users').update({ taps_left: tapsLeftRef.current })
+        .eq('id', uid).then(({ error }) => error && console.error('Flush taps_left:', error));
 
-      // Simpan sisa RIBS buffer
       const remaining = tapBufferRef.current;
       if (remaining > 0) {
         tapBufferRef.current = 0;
-        supabase
-          .rpc('increment_ribs', { user_id: uid, amount: remaining })
-          .then(({ error }) => {
-            if (error) console.error('Cleanup increment_ribs error:', error);
-          });
+        supabase.rpc('increment_ribs', { user_id: uid, amount: remaining })
+          .then(({ error }) => error && console.error('Flush ribs:', error));
       }
     };
-  }, []); // kosong — pakai refs
+  }, []);
 
-  // ── Title ────────────────────────────────────────────────
-  const getUserTitle = (b: number): string => {
+  // ── Title ─────────────────────────────────────────────────
+  const getUserTitle = (b: number) => {
     if (b >= 300000) return 'Legend';
     if (b >= 100000) return 'Grandmaster';
-    if (b >= 50000) return 'Master';
-    if (b >= 25000) return 'Elite';
-    if (b >= 10000) return 'Skilled';
+    if (b >= 50000)  return 'Master';
+    if (b >= 25000)  return 'Elite';
+    if (b >= 10000)  return 'Skilled';
     return 'Beginner';
   };
 
-  // ── Countdown timer ──────────────────────────────────────
+  // ── Countdown timer ───────────────────────────────────────
   useEffect(() => {
     if (claimTime === null) return;
     const update = () => {
       const diff = claimTime - Date.now();
-      if (diff <= 0) {
-        setTimeToClaim('Ready to Claim');
-        return;
-      }
+      if (diff <= 0) { setTimeToClaim('Ready to Claim'); return; }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setTimeToClaim(
-        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-      );
+      setTimeToClaim(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
     };
     update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
+    const iv = setInterval(update, 1000);
+    return () => clearInterval(iv);
   }, [claimTime]);
 
-  // ── Tap handler ──────────────────────────────────────────
+  // ── Tap handler ───────────────────────────────────────────
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (tapsLeft <= 0 || !isLoaded) return;
 
-    const newTapsLeft = tapsLeft - 1;
-    setTapsLeft(newTapsLeft);
-    tapsLeftRef.current = newTapsLeft;
+    const newTaps = tapsLeft - 1;
+    setTapsLeft(newTaps);
+    tapsLeftRef.current = newTaps;
     setBalance(prev => prev + tapAmount);
     tapBufferRef.current += tapAmount;
 
-    // Debounce save 2 detik
     if (tapSaveTimerRef.current) clearTimeout(tapSaveTimerRef.current);
     tapSaveTimerRef.current = setTimeout(() => {
       const uid = userIdRef.current;
       if (!uid) return;
-
-      // Save taps_left
-      safeSaveTaps(uid, tapsLeftRef.current);
-
-      // Save RIBS buffer
-      const amount = tapBufferRef.current;
-      if (amount > 0) {
+      supabase.from('users').update({ taps_left: tapsLeftRef.current })
+        .eq('id', uid).then(({ error }) => error && console.error('Save taps_left:', error));
+      const amt = tapBufferRef.current;
+      if (amt > 0) {
         tapBufferRef.current = 0;
-        safeSaveRibs(uid, amount);
+        supabase.rpc('increment_ribs', { user_id: uid, amount: amt })
+          .then(({ error }) => error && console.error('increment_ribs:', error));
       }
     }, 2000);
 
-    // Floating number animation
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect   = e.currentTarget.getBoundingClientRect();
     const newNum = { id: Date.now(), x: e.clientX - rect.left, y: e.clientY - rect.top };
     setFloatingNumbers(prev => [...prev, newNum]);
-    setTimeout(
-      () => setFloatingNumbers(curr => curr.filter(n => n.id !== newNum.id)),
-      1500
-    );
+    setTimeout(() => setFloatingNumbers(curr => curr.filter(n => n.id !== newNum.id)), 1500);
   };
 
-  // ── Faucet activate ──────────────────────────────────────
+  // ── Faucet activate ───────────────────────────────────────
   const handleActivate = async () => {
     if (!userId) return;
     const nextClaim = Date.now() + CLAIM_DURATION_MS;
     setClaimTime(nextClaim);
     setIsActivated(true);
-    try {
-      await supabase
-        .from('users')
-        .update({ next_faucet_claim: new Date(nextClaim).toISOString() })
-        .eq('id', userId);
-      toast({ title: 'Faucet Activated! ✅' });
-    } catch {
-      toast({ title: 'Gagal mengaktifkan faucet', variant: 'destructive' });
-    }
+    supabase.from('users')
+      .update({ next_faucet_claim: new Date(nextClaim).toISOString() })
+      .eq('id', userId)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Activate faucet:', error);
+          toast({ title: 'Failed to activate faucet', variant: 'destructive' });
+        } else {
+          toast({ title: 'Faucet Activated! ✅' });
+        }
+      });
   };
 
-  // ── Faucet claim ─────────────────────────────────────────
+  // ── Faucet claim ──────────────────────────────────────────
   const handleClaim = async () => {
     if (!userId) return;
     try {
@@ -289,13 +246,14 @@ export default function FarmPage() {
       setClaimTime(new Date(nextClaimStr).getTime());
       toast({ title: `✅ Claimed ${claimAmount} RIBS!` });
     } catch {
-      toast({ title: 'Claim gagal, coba lagi', variant: 'destructive' });
+      toast({ title: 'Claim failed, please try again', variant: 'destructive' });
     }
   };
 
-  // ── Upgrade ──────────────────────────────────────────────
+  // ── Upgrade handler ───────────────────────────────────────
   const handleUpgrade = async (upgradeId: string) => {
     if (!userId) return;
+
     const idx = upgrades.findIndex(u => u.id === upgradeId);
     if (idx === -1) return;
 
@@ -308,28 +266,38 @@ export default function FarmPage() {
       return;
     }
 
+    const newLevel = upgrade.level + 1;
+    const col      = UPGRADE_COL[upgradeId];
+
     // Optimistic update
     setBalance(prev => prev - cost);
-    const newUpgrades = upgrades.map((u, i) =>
-      i === idx ? { ...u, level: u.level + 1 } : u
-    );
-    setUpgrades(newUpgrades);
+    setUpgrades(prev => prev.map((u, i) => i === idx ? { ...u, level: newLevel } : u));
 
     try {
-      const { error } = await supabase.rpc('increment_ribs', { user_id: userId, amount: -cost });
-      if (error) throw error;
-      toast({ title: `✅ Upgraded ${upgrade.name}!` });
-    } catch {
+      // Save new level + deduct RIBS in parallel
+      const [ribsRes, levelRes] = await Promise.all([
+        supabase.rpc('increment_ribs', { user_id: userId, amount: -cost }),
+        col
+          ? supabase.from('users').update({ [col]: newLevel }).eq('id', userId)
+          : Promise.resolve({ error: null }),
+      ]);
+
+      if (ribsRes.error) throw ribsRes.error;
+      if (levelRes.error) throw levelRes.error;
+
+      toast({ title: `✅ ${upgrade.name} upgraded to level ${newLevel}!` });
+    } catch (e) {
+      console.error('handleUpgrade error:', e);
       // Rollback
       setBalance(prev => prev + cost);
-      setUpgrades(upgrades);
-      toast({ title: 'Upgrade gagal', variant: 'destructive' });
+      setUpgrades(prev => prev.map((u, i) => i === idx ? { ...u, level: upgrade.level } : u));
+      toast({ title: 'Upgrade failed, please try again', variant: 'destructive' });
     }
   };
 
   const userTitle = getUserTitle(balance);
 
-  // ── Render ───────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────
   return (
     <AppLayout>
       <div className="relative">
@@ -346,11 +314,7 @@ export default function FarmPage() {
                   setBalance(prev => prev + 200);
                   toast({ title: '✅ Checked in! +200 RIBS' });
                 } else {
-                  toast({
-                    title: 'Check-in failed',
-                    description: res.message,
-                    variant: 'destructive',
-                  });
+                  toast({ title: 'Check-in failed', description: res.message, variant: 'destructive' });
                 }
               }}
               disabled={hasCheckedInToday || !isLoaded}
@@ -365,14 +329,12 @@ export default function FarmPage() {
             </Link>
           </div>
 
-          <div
-            className={cn(
-              'text-xs font-bold px-3 py-1.5 rounded-full shadow-md mt-8',
-              balance >= 300000
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black'
-                : 'bg-secondary'
-            )}
-          >
+          <div className={cn(
+            'text-xs font-bold px-3 py-1.5 rounded-full shadow-md mt-8',
+            balance >= 300000
+              ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black'
+              : 'bg-secondary'
+          )}>
             {userTitle}
           </div>
         </div>
@@ -391,7 +353,7 @@ export default function FarmPage() {
             </p>
           </div>
 
-          {/* Tap button + energy bar */}
+          {/* Tap button */}
           <div className="flex flex-col items-center space-y-4">
             <button
               onClick={handleTap}
@@ -417,13 +379,10 @@ export default function FarmPage() {
                   ? `${tapsLeft.toLocaleString('en-US')} / ${dailyTaps.toLocaleString('en-US')}`
                   : 'Loading...'}
               </p>
-              <Progress
-                value={isLoaded ? (tapsLeft / dailyTaps) * 100 : 0}
-                className="h-3"
-              />
+              <Progress value={isLoaded ? (tapsLeft / dailyTaps) * 100 : 0} className="h-3" />
               {tapsLeft <= 0 && isLoaded && (
                 <p className="text-xs text-destructive font-medium mt-1">
-                  ⚡ Energy habis! Kembali besok untuk tap lagi.
+                  ⚡ Energy depleted! Come back tomorrow.
                 </p>
               )}
             </div>
