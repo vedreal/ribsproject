@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { CalendarCheck, Disc, ArrowUpCircle } from 'lucide-react';
@@ -360,7 +361,13 @@ export default function FarmPage() {
               disabled={tapsLeft <= 0 || !isLoaded}
               className="relative w-64 h-64 rounded-full bg-primary/20 border-4 border-primary/50 shadow-lg transition-transform duration-100 active:scale-95 disabled:opacity-50 flex items-center justify-center"
             >
-              <RibsIcon className="w-24 h-24 text-primary" />
+              <Image
+                src="https://gold-defensive-cattle-30.mypinata.cloud/ipfs/bafybeigwlusnazuypgpol5nzay6oaktvebki7i4hwwrsztxfl6ilisb7om"
+                alt="RIBS"
+                width={96}
+                height={96}
+                className="rounded-full object-contain"
+              />
               {floatingNumbers.map(num => (
                 <span
                   key={num.id}
